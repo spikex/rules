@@ -46,8 +46,8 @@ func InitializeFormat(formatName string) error {
 		return fmt.Errorf("failed to create directory %s: %w", dirPath, err)
 	}
 	
-	// Create rules.json if it doesn't exist
-	rulesJSONPath := filepath.Join(dirPath, "rules.json")
+	// Create rules.json in the root directory if it doesn't exist
+	rulesJSONPath := "rules.json"
 	if _, err := os.Stat(rulesJSONPath); os.IsNotExist(err) {
 		defaultRulesJSON := `{
   "name": "ruleset-name",
@@ -76,12 +76,13 @@ func GetRulesDirectory(formatName string) (string, error) {
 	return format.DirectoryPrefix, nil
 }
 
-// GetRulesJSONPath returns the path to rules.json for a given format
+// GetRulesJSONPath returns the path to rules.json file in the root directory
 func GetRulesJSONPath(formatName string) (string, error) {
-	dir, err := GetRulesDirectory(formatName)
-	if err != nil {
-		return "", err
+	// Check if format exists
+	if _, exists := Formats[formatName]; !exists {
+		return "", fmt.Errorf("unknown format: %s", formatName)
 	}
 	
-	return filepath.Join(dir, "rules.json"), nil
+	// Return the path to rules.json in the root directory
+	return "rules.json", nil
 }
