@@ -3,7 +3,6 @@ package ruleset
 import (
 	"encoding/json"
 	"errors"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -42,7 +41,7 @@ func DefaultRuleSet(name string) *RuleSet {
 
 // LoadRuleSet loads a ruleset from a specified path
 func LoadRuleSet(path string) (*RuleSet, error) {
-	data, err := ioutil.ReadFile(path)
+	data, err := os.ReadFile(path)
 	if err != nil {
 		return nil, err
 	}
@@ -62,12 +61,21 @@ func (rs *RuleSet) SaveRuleSet(path string) error {
 		return err
 	}
 
-	return ioutil.WriteFile(path, data, 0644)
+	return os.WriteFile(path, data, 0644)
 }
 
 // AddRule adds a rule to the ruleset with the given name and version
 func (rs *RuleSet) AddRule(name, version string) {
 	rs.Rules[name] = version
+}
+
+// RemoveRule removes a rule from the ruleset if it exists
+func (rs *RuleSet) RemoveRule(name string) bool {
+	if _, exists := rs.Rules[name]; exists {
+		delete(rs.Rules, name)
+		return true
+	}
+	return false
 }
 
 // RuleExists checks if a rule exists in the ruleset
@@ -119,5 +127,5 @@ func CreateRule(rule Rule, format, name string) error {
 
 	// Create the rule file
 	fileName := filepath.Join(ruleDir, name+".md")
-	return ioutil.WriteFile(fileName, []byte(content), 0644)
+	return os.WriteFile(fileName, []byte(content), 0644)
 }

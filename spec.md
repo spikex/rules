@@ -23,6 +23,7 @@ rules-cli/
 │   ├── init.go         # Init command
 │   ├── create.go       # Create command
 │   ├── add.go          # Add command
+│   ├── remove.go       # Remove command
 ├── internal/
 │   ├── config/         # Configuration management
 │   ├── formats/        # Format handling (cursor, default, etc)
@@ -101,6 +102,16 @@ rules add vercel/nextjs
 - Adds the rule to rules.json "rules" object
 - Downloads rule files from the registry to appropriate folder (e.g. `.rules/vercel/nextjs/`)
 
+### 4. Rule Removal (rules remove)
+
+```bash
+rules remove vercel/nextjs
+```
+
+- Removes the rule from rules.json "rules" object
+- Optionally deletes rule files from the local directory (with --delete flag)
+- Provides confirmation prompt before deletion (can be bypassed with --force flag)
+
 ## Command Specifications
 
 ### `rules init`
@@ -133,6 +144,18 @@ rules add vercel/nextjs
   - Fetches ruleset from registry
   - Adds to rules.json "rules" object
   - Validates ruleset exists
+
+### `rules remove`
+
+- **Args**:
+  - Name of ruleset to remove
+- **Flags**:
+  - `--delete`: Also delete rule files from disk
+  - `--force`: Skip confirmation prompts
+- **Behavior**:
+  - Removes rule reference from rules.json
+  - Optionally deletes rule files from disk
+  - Confirms before destructive operations
 
 ## Error Handling
 

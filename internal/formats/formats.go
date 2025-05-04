@@ -3,7 +3,6 @@ package formats
 import (
 	"fmt"
 	"os"
-	"path/filepath"
 )
 
 // Format represents a rules format
