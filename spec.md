@@ -92,6 +92,7 @@ rules create --alwaysApply # Body not supplied, so will prompt for it interactiv
 - Supports flags for all rule properties (tags, globs, description, alwaysApply)
 - Allows for stdin/editor input for rule body
 - Creates a new rule (.md) file in the root of the rules directory
+- Does not modify the rules.json file at all
 
 ### 3. Rule Importing (rules add)
 
@@ -135,6 +136,7 @@ rules remove vercel/nextjs
 - **Behavior**:
   - Prompts for missing fields if not provided
   - Creates rule file in root of the rules directory
+  - Does not modify the rules.json file
 
 ### `rules add`
 

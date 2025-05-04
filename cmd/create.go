@@ -8,7 +8,6 @@ import (
 
 	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
-	"rules-cli/internal/formats"
 	"rules-cli/internal/ruleset"
 )
 
@@ -25,7 +24,8 @@ var createCmd = &cobra.Command{
 	Use:   "create [rule-name] [rule-body]",
 	Short: "Create a new rule",
 	Long: `Create a new rule in the current ruleset.
-If rule parameters are not provided, they will be prompted for interactively.`,
+If rule parameters are not provided, they will be prompted for interactively.
+This command does not modify the rules.json file.`,
 	Example: `  rules create my-rule "This is the body of the rule"
   rules create --tags frontend --globs "*.{tsx,jsx}" --description "React style guide" my-rule`,
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -93,25 +93,9 @@ If rule parameters are not provided, they will be prompted for interactively.`,
 			rule.Body = strings.Join(bodyLines, "\n")
 		}
 
-		// Get rules directory for the format
+		// Create the rule file
 		if err := ruleset.CreateRule(rule, format, ruleName); err != nil {
 			return fmt.Errorf("failed to create rule: %w", err)
-		}
-
-		// Update rules.json
-		rulesJSONPath, err := formats.GetRulesJSONPath(format)
-		if err != nil {
-			return fmt.Errorf("failed to get rules.json path: %w", err)
-		}
-
-		rs, err := ruleset.LoadRuleSet(rulesJSONPath)
-		if err != nil {
-			return fmt.Errorf("failed to load ruleset: %w", err)
-		}
-
-		rs.AddRule(ruleName, "0.0.1")
-		if err := rs.SaveRuleSet(rulesJSONPath); err != nil {
-			return fmt.Errorf("failed to save ruleset: %w", err)
 		}
 
 		fmt.Printf("Rule '%s' created successfully\n", ruleName)
