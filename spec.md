@@ -38,8 +38,6 @@ rules-cli/
 
 ### rules.json
 
-The `rules.json` file goes in the root of the project, adjacent to the rules directory
-
 ```json
 {
   "name": "ruleset-name",
