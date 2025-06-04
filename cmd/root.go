@@ -4,14 +4,20 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/spf13/cobra"
 	"rules-cli/internal/config"
+
+	"github.com/spf13/cobra"
 )
+
+// Version represents the current version of the CLI
+// This will be set during build via ldflags
+var Version = "dev"
 
 var (
 	cfgFile string
 	cfg     *config.Config
 	format  string
+	version bool
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -21,6 +27,14 @@ var rootCmd = &cobra.Command{
 	Long: `A command-line tool to create, manage, and convert rule sets 
 for code guidance across different AI assistant platforms 
 (Continue, Cursor, Claude Code, Copilot, etc.).`,
+	Run: func(cmd *cobra.Command, args []string) {
+		if version {
+			fmt.Printf("rules version %s\n", Version)
+			return
+		}
+		// If no subcommand is specified and no version flag, show help
+		cmd.Help()
+	},
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -34,6 +48,9 @@ func init() {
 	// Global flags
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.rules-cli/rules-cli.yaml)")
 	rootCmd.PersistentFlags().StringVar(&format, "format", "", "rule format (default is set in config)")
+	
+	// Version flag
+	rootCmd.Flags().BoolVarP(&version, "version", "v", false, "Display version information")
 }
 
 // initConfig reads in config file and ENV variables if set.
