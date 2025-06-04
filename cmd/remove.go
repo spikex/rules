@@ -22,10 +22,13 @@ var removeCmd = &cobra.Command{
 	Short: "Remove a rule from the ruleset",
 	Long: `Remove a rule from the ruleset.
 By default, this only removes the rule from rules.json.
-Use --delete to also remove rule files from disk.`,
+Use --delete to also remove rule files from disk.
+
+For GitHub repositories, use the same gh: prefix as when adding.`,
 	Example: `  rules remove vercel/nextjs
   rules remove redis --delete
-  rules remove workos/authkit-nextjs --delete --force`,
+  rules remove workos/authkit-nextjs --delete --force
+  rules remove gh:owner/repo --delete`,
 	Args: cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ruleName := args[0]

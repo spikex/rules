@@ -4,5 +4,7 @@
   "author": "Author Name",
   "license": "Apache-2.0",
   "version": "1.0.0",
-  "rules": {}
+  "rules": {
+    "gh:continuedev/continue-internal-rules": "0.0.1"
+  }
 }

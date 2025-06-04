@@ -50,7 +50,8 @@ The `rules.json` file goes in the root of the project, adjacent to the rules dir
   "version": "1.0.0",
   "rules": {
     "redis": "0.0.1",
-    "workos/authkit-nextjs": "0.0.1"
+    "workos/authkit-nextjs": "0.0.1",
+    "gh:owner/repo": "0.0.1"
   }
 }
 ```
@@ -98,15 +99,20 @@ rules create --alwaysApply # Body not supplied, so will prompt for it interactiv
 
 ```bash
 rules add vercel/nextjs
+rules add gh:owner/repo
 ```
 
 - Adds the rule to rules.json "rules" object
 - Downloads rule files from the registry to appropriate folder (e.g. `.rules/vercel/nextjs/`)
+- When using `gh:` prefix, downloads the rules from the GitHub repository:
+  - By default, imports all files from the `src/` directory in the repository
+  - Downloads from the main branch of the repository
 
 ### 4. Rule Removal (rules remove)
 
 ```bash
 rules remove vercel/nextjs
+rules remove gh:owner/repo
 ```
 
 - Removes the rule from rules.json "rules" object
@@ -141,16 +147,19 @@ rules remove vercel/nextjs
 ### `rules add`
 
 - **Args**:
-  - Name of ruleset to add
+  - Name of ruleset to add (with optional `gh:` prefix for GitHub repositories)
 - **Behavior**:
-  - Fetches ruleset from registry
+  - Fetches ruleset from registry or GitHub based on prefix
+  - For GitHub repos:
+    - Downloads all files from the `src/` directory in the repository
+    - Uses the main branch by default
   - Adds to rules.json "rules" object
   - Validates ruleset exists
 
 ### `rules remove`
 
 - **Args**:
-  - Name of ruleset to remove
+  - Name of ruleset to remove (including GitHub-sourced rules)
 - **Flags**:
   - `--delete`: Also delete rule files from disk
   - `--force`: Skip confirmation prompts

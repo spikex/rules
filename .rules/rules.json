@@ -1,8 +1,0 @@
-{
-  "name": "ruleset-name",
-  "description": "Description of the ruleset",
-  "author": "Author Name",
-  "license": "Apache-2.0",
-  "version": "1.0.0",
-  "rules": {}
-}

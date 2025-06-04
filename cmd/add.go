@@ -15,18 +15,28 @@ var addCmd = &cobra.Command{
 	Use:   "add <rulename>",
 	Short: "Add a rule from the registry",
 	Long: `Add a rule from the registry to the current ruleset.
-The rule will be downloaded and added to the rules.json file.`,
+The rule will be downloaded and added to the rules.json file.
+
+For GitHub repositories, use the gh: prefix followed by the owner/repo.
+For example: gh:owner/repo
+
+When importing from GitHub repositories, the tool will:
+- Download all files from the 'src/' directory in the repository
+- Use the main branch of the repository by default`,
 	Example: `  rules add vercel/nextjs
-  rules add redis`,
+  rules add redis
+  rules add gh:owner/repo`,
 	Args: cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ruleName := args[0]
 		ruleVersion := "0.0.1" // Default version
 		
-		// Check if version is specified
-		if parts := strings.Split(ruleName, "@"); len(parts) > 1 {
-			ruleName = parts[0]
-			ruleVersion = parts[1]
+		// Check if version is specified (but not for GitHub URLs)
+		if !strings.HasPrefix(ruleName, "gh:") {
+			if parts := strings.Split(ruleName, "@"); len(parts) > 1 {
+				ruleName = parts[0]
+				ruleVersion = parts[1]
+			}
 		}
 		
 		// Get rules directory for the format
@@ -57,7 +67,12 @@ The rule will be downloaded and added to the rules.json file.`,
 		client := registry.NewClient(cfg.RegistryURL)
 		
 		// Download rule
-		fmt.Printf("Downloading rule '%s' (version %s)...\n", ruleName, ruleVersion)
+		if strings.HasPrefix(ruleName, "gh:") {
+			fmt.Printf("Downloading rules from GitHub repository '%s' (src/ directory)...\n", ruleName[3:])
+		} else {
+			fmt.Printf("Downloading rule '%s' (version %s)...\n", ruleName, ruleVersion)
+		}
+		
 		if err := client.DownloadRule(ruleName, ruleVersion, rulesDir); err != nil {
 			return fmt.Errorf("failed to download rule: %w", err)
 		}
