@@ -19,11 +19,12 @@ A command-line tool to create, manage, and convert rule sets for code guidance a
 ```
 rules-cli/
 ├── cmd/
-│   ├── root.go         # Main command definition
+│ ├── root.go         # Main command definition
 │   ├── init.go         # Init command
 │   ├── create.go       # Create command
 │   ├── add.go          # Add command
 │   ├── remove.go       # Remove command
+│   ├── render.go       # Render command
 ├── internal/
 │   ├── config/         # Configuration management
 │   ├── formats/        # Format handling (cursor, default, etc)
@@ -119,6 +120,20 @@ rules remove gh:owner/repo
 - Optionally deletes rule files from the local directory (with --delete flag)
 - Provides confirmation prompt before deletion (can be bypassed with --force flag)
 
+### 5. Rule Rendering (rules render)
+
+```bash
+rules render foo
+rules render cursor
+rules render --all  # Renders to all formats specified in config
+```
+
+- Renders existing rules to a specified format
+- Creates `.{format}/rules/` directory (e.g., `.foo/rules/`)
+- Copies all rules from the default location (`.rules/`) to the target format location
+- Can render to multiple formats simultaneously with `--all` flag
+- Preserves directory structure of rule sets
+
 ## Command Specifications
 
 ### `rules init`
@@ -167,6 +182,17 @@ rules remove gh:owner/repo
   - Removes rule reference from rules.json
   - Optionally deletes rule files from disk
   - Confirms before destructive operations
+
+### `rules render`
+
+- **Args**:
+  - Name of format to render rules to (e.g., "foo", "continue")
+- **Behavior**:
+  - Creates `.{format}/rules/` directory structure
+  - Copies all rules from the default location (`.rules/`) to the target format location
+  - Preserves directory structure of rule sets
+  - Can perform format-specific transformations if needed
+  - Does not modify the original rule files
 
 ## Error Handling
 

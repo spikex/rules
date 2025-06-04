@@ -2,6 +2,7 @@ package config
 
 import (
 	"os"
+	"strings"
 )
 
 // Config holds configuration for the rules CLI
@@ -10,6 +11,7 @@ type Config struct {
 	DefaultFormat  string
 	Username       string
 	Email          string
+	Formats        []string
 }
 
 // Initialize sets up the configuration from environment variables
@@ -20,6 +22,7 @@ func Initialize() (*Config, error) {
 		DefaultFormat:  "default",
 		Username:       "",
 		Email:          "",
+		Formats:        []string{"default", "cursor"},
 	}
 
 	// Override from environment variables
@@ -38,5 +41,19 @@ func Initialize() (*Config, error) {
 	if envEmail := os.Getenv("RULES_EMAIL"); envEmail != "" {
 		config.Email = envEmail
 	}
+
+	if envFormats := os.Getenv("RULES_FORMATS"); envFormats != "" {
+		config.Formats = strings.Split(envFormats, ",")
+		// Trim whitespace from format names
+		for i, format := range config.Formats {
+			config.Formats[i] = strings.TrimSpace(format)
+		}
+	}
+	
 	return &config, nil
+}
+
+// LoadConfig loads the configuration
+func LoadConfig() (*Config, error) {
+	return Initialize()
 }
