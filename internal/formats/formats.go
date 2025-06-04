@@ -9,36 +9,28 @@ import (
 type Format struct {
 	Name            string
 	DirectoryPrefix string
-	ConfigTemplate  string
 }
 
-// Known formats
-var (
-	DefaultFormat = Format{
-		Name:            "default",
-		DirectoryPrefix: ".rules",
-		ConfigTemplate:  "",
+// GetFormat returns a Format for the given format name
+func GetFormat(formatName string) Format {
+	// Default to ".rules" if no format is specified or format is "default"
+	if formatName == "" || formatName == "default" {
+		return Format{
+			Name:            "default",
+			DirectoryPrefix: ".rules",
+		}
 	}
 	
-	CursorFormat = Format{
-		Name:            "cursor",
-		DirectoryPrefix: ".cursor/rules",
-		ConfigTemplate:  "",
+	// Otherwise use .<format>/rules
+	return Format{
+		Name:            formatName,
+		DirectoryPrefix: fmt.Sprintf(".%s/rules", formatName),
 	}
+}
 	
-	// Add more formats as needed
-	Formats = map[string]Format{
-		"default": DefaultFormat,
-		"cursor":  CursorFormat,
-	}
-)
-
 // InitializeFormat creates the directory structure for a format
 func InitializeFormat(formatName string) error {
-	format, exists := Formats[formatName]
-	if !exists {
-		return fmt.Errorf("unknown format: %s", formatName)
-	}
+	format := GetFormat(formatName)
 	
 	dirPath := format.DirectoryPrefix
 	if err := os.MkdirAll(dirPath, 0755); err != nil {
@@ -67,21 +59,12 @@ func InitializeFormat(formatName string) error {
 
 // GetRulesDirectory returns the rules directory for a given format
 func GetRulesDirectory(formatName string) (string, error) {
-	format, exists := Formats[formatName]
-	if !exists {
-		return "", fmt.Errorf("unknown format: %s", formatName)
-	}
-	
+	format := GetFormat(formatName)
 	return format.DirectoryPrefix, nil
 }
 
 // GetRulesJSONPath returns the path to rules.json file in the root directory
 func GetRulesJSONPath(formatName string) (string, error) {
-	// Check if format exists
-	if _, exists := Formats[formatName]; !exists {
-		return "", fmt.Errorf("unknown format: %s", formatName)
-	}
-	
 	// Return the path to rules.json in the root directory
 	return "rules.json", nil
 }
