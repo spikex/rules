@@ -25,6 +25,7 @@ rules-cli/
 │   ├── add.go          # Add command
 │   ├── remove.go       # Remove command
 │   ├── render.go       # Render command
+│   ├── install.go      # Install command
 ├── internal/
 │   ├── config/         # Configuration management
 │   ├── formats/        # Format handling (cursor, default, etc)
@@ -134,6 +135,20 @@ rules render --all  # Renders to all formats specified in config
 - Can render to multiple formats simultaneously with `--all` flag
 - Preserves directory structure of rule sets
 
+### 6. Rule Installation (rules install)
+
+```bash
+rules install
+rules install --force  # Skip confirmation prompts
+```
+
+- Synchronizes the `.rules` directory with the contents of `rules.json`
+- Performs a clean installation by:
+  - Removing all existing rule files and directories first
+  - Re-downloading and installing all rules specified in `rules.json`
+- Provides confirmation prompt before deleting existing rules (can be bypassed with --force flag)
+- Useful for ensuring the rules directory matches exactly what's defined in `rules.json`
+
 ## Command Specifications
 
 ### `rules init`
@@ -193,6 +208,17 @@ rules render --all  # Renders to all formats specified in config
   - Preserves directory structure of rule sets
   - Can perform format-specific transformations if needed
   - Does not modify the original rule files
+
+### `rules install`
+
+- **Flags**:
+  - `--force`: Skip confirmation prompts
+- **Behavior**:
+  - Removes all existing rule files and directories from `.rules/`
+  - Re-downloads and installs all rules specified in `rules.json`
+  - Confirms before deleting existing rules
+  - Ensures the `.rules` directory exactly matches the specification in `rules.json`
+  - Reports on installation progress and any errors encountered
 
 ## Error Handling
 
