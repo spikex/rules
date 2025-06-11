@@ -1,0 +1,109 @@
+/**
+ * Any CSS included here will be global. The classic template
+ * bundles Infima by default. Infima is a CSS framework designed to
+ * work well for content-centric websites.
+ */
+
+/* You can override the default Infima variables here. */
+:root {
+  --ifm-color-primary: #2e8555;
+  --ifm-color-primary-dark: #29784c;
+  --ifm-color-primary-darker: #277148;
+  --ifm-color-primary-darkest: #205d3b;
+  --ifm-color-primary-light: #33925d;
+  --ifm-color-primary-lighter: #359962;
+  --ifm-color-primary-lightest: #3cad6e;
+  --ifm-code-font-size: 95%;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+}
+
+/* For readability concerns, you should choose a lighter palette in dark mode. */
+[data-theme="dark"] {
+  --ifm-color-primary: #25c2a0;
+  --ifm-color-primary-dark: #21af90;
+  --ifm-color-primary-darker: #1fa588;
+  --ifm-color-primary-darkest: #1a8870;
+  --ifm-color-primary-light: #29d5b0;
+  --ifm-color-primary-lighter: #32d8b4;
+  --ifm-color-primary-lightest: #4fddbf;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+}
+
+/* Hide navigation elements */
+.navbar {
+  display: none !important;
+}
+
+/* Hide the navbar toggle button */
+.navbar__toggle {
+  display: none !important;
+}
+
+/* Hide the footer */
+.footer {
+  display: none !important;
+}
+
+/* Hide the docs sidebar */
+.theme-doc-sidebar-container {
+  display: none !important;
+}
+
+/* Hide the mobile sidebar toggle button */
+.menu__button {
+  display: none !important;
+}
+
+/* Make the main content take full width */
+.main-wrapper {
+  width: 100% !important;
+  max-width: 100% !important;
+  padding: 0 !important;
+}
+
+.container {
+  max-width: 800px !important;
+  margin: 0 auto !important;
+  padding: 2rem !important;
+}
+
+/* Make the docs content area take full width */
+.docMainContainer_gTbr,
+.docItemCol_VOVn {
+  max-width: 100% !important;
+  flex-grow: 1 !important;
+}
+
+/* Remove sidebar spacing */
+.docMainContainer_gTbr .col--3 {
+  display: none !important;
+}
+
+/* Hide pagination */
+.pagination-nav {
+  display: none !important;
+}
+
+/* Hide table of contents */
+.table-of-contents {
+  display: none !important;
+}
+
+/* Typography improvements */
+.markdown > h1:first-child {
+  font-size: 2.5rem !important;
+  margin-bottom: 2rem !important;
+}
+
+.markdown > h2 {
+  font-size: 1.8rem !important;
+  margin-top: 2rem !important;
+  margin-bottom: 1rem !important;
+}
+
+.markdown > p,
+.markdown > ul li,
+.markdown > ol li {
+  font-size: 1.1rem !important;
+  line-height: 1.7 !important;
+}
