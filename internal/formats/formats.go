@@ -3,6 +3,8 @@ package formats
 import (
 	"fmt"
 	"os"
+	"path/filepath"
+	"strings"
 )
 
 // Format represents a rules format
@@ -67,4 +69,30 @@ func GetRulesDirectory(formatName string) (string, error) {
 func GetRulesJSONPath(formatName string) (string, error) {
 	// Return the path to rules.json in the root directory
 	return "rules.json", nil
+}
+
+// FindRulesFormats looks for any top-level folder with the structure ".{folder-name}/rules"
+// and returns a list of folder names without the dot prefix
+func FindRulesFormats() ([]string, error) {
+	entries, err := os.ReadDir(".")
+	if err != nil {
+		return nil, err
+	}
+
+	var formatFolders []string
+	for _, entry := range entries {
+		if !entry.IsDir() || !strings.HasPrefix(entry.Name(), ".") {
+			continue
+		}
+
+		// Check if this directory has a "rules" subdirectory
+		rulesDir := filepath.Join(entry.Name(), "rules")
+		if info, err := os.Stat(rulesDir); err == nil && info.IsDir() {
+			// Found a format folder - add the format name without the dot prefix
+			formatName := strings.TrimPrefix(entry.Name(), ".")
+			formatFolders = append(formatFolders, formatName)
+		}
+	}
+
+	return formatFolders, nil
 }

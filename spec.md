@@ -110,6 +110,9 @@ rules add gh:owner/repo
 - When using `gh:` prefix, downloads the rules from the GitHub repository:
   - By default, imports all files from the `src/` directory in the repository
   - Downloads from the main branch of the repository
+- When rules.json doesn't exist:
+  - Check for any top-level folder of the structure ".{folder-name}/rules"
+  - If one exists, print a suggestion to the user to run `rules render {folder-name}`
 
 ### 4. Rule Removal (rules remove)
 
@@ -189,6 +192,9 @@ rules install --force  # Skip confirmation prompts
     - Uses the main branch by default
   - Adds to rules.json "rules" object
   - Validates ruleset exists
+  - When rules.json doesn't exist:
+    - Check for any top-level folder of the structure ".{folder-name}/rules"
+    - If one exists, print a suggestion to the user to run `rules render {folder-name}`
 
 ### `rules remove`
 
