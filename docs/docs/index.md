@@ -6,7 +6,7 @@ title: rules
 
 :::tip
 
-**tl;dr:** `brew install rules` then `rules add vercel/nextjs`
+**tl;dr:** `brew install rules` then `rules add starter/nextjs-rules`
 
 :::
 
@@ -16,7 +16,7 @@ title: rules
 
 :::info
 
-`rules` is currently only available privately through the `continuedev` tap. Soon it will be available publicly with `brew install rules`, and on other operating systems.
+`rules` is currently only available privately through the `continuedev` tap (you must be logged in with GitHub such that you can `git clone` private continuedev repos). Soon it will be available publicly with `brew install rules`, and on other operating systems.
 
 :::
 
@@ -31,7 +31,7 @@ brew install continuedev/tap/rules
 To download rules to your repository you can use `rules add`. For example:
 
 ```bash
-rules add vercel/nextjs
+rules add starter/nextjs-rules
 ```
 
 This will add them to your project in a local `.rules` folder.
