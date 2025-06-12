@@ -27,6 +27,7 @@ rules-cli/
 │   ├── render.go       # Render command
 │   ├── install.go      # Install command
 │   ├── publish.go      # Publish command
+│   ├── whoami.go       # Whoami command
 ├── internal/
 │   ├── config/         # Configuration management
 │   ├── formats/        # Format handling (cursor, default, etc)
@@ -213,6 +214,21 @@ rules publish my-rule.md --slug my-org/my-rules --visibility private
   - Requires user to be logged in (uses Bearer auth)
   - Sets the visibility of the published rule according to the flag
   - Returns a confirmation message with the published rule's details
+
+### `rules whoami`
+
+Displays information about the currently authenticated user.
+
+```bash
+rules whoami
+```
+
+- **Behavior**:
+  - Checks if the user is currently logged in
+  - If logged in, displays user information (username, email, organization)
+  - If not logged in, displays a message indicating the user is not authenticated
+  - Uses the authentication information stored in the auth file
+  - May make a request to the registry API to fetch the latest user information
 
 ### `rules login`
 
