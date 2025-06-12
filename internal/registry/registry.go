@@ -183,7 +183,6 @@ func (c *Client) PublishRule(ownerSlug, ruleSlug, content string, visibility str
 		return fmt.Errorf("failed to publish rule: status %d, response: %s", resp.StatusCode, string(bodyBytes))
 	}
 	
-	fmt.Printf("Successfully published rule '%s/%s'\n", ownerSlug, ruleSlug)
 	return nil
 }
 
