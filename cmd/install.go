@@ -6,10 +6,11 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/spf13/cobra"
 	"rules-cli/internal/formats"
 	"rules-cli/internal/registry"
 	"rules-cli/internal/ruleset"
+
+	"github.com/spf13/cobra"
 )
 
 var (
@@ -41,10 +42,30 @@ This ensures the rules directory matches exactly what's defined in rules.json.`,
 			return fmt.Errorf("failed to get rules.json path: %w", err)
 		}
 
-		// Load ruleset
-		rs, err := ruleset.LoadRuleSet(rulesJSONPath)
-		if err != nil {
-			return fmt.Errorf("failed to load ruleset: %w", err)
+		// Check if rules.json exists, create it if it doesn't
+		var rs *ruleset.RuleSet
+		if _, err := os.Stat(rulesJSONPath); os.IsNotExist(err) {
+			// Create directory if it doesn't exist
+			if err := os.MkdirAll(filepath.Dir(rulesJSONPath), 0755); err != nil {
+				return fmt.Errorf("failed to create directory for rules.json: %w", err)
+			}
+			
+			// Create a default ruleset
+			rs = ruleset.DefaultRuleSet(filepath.Base(filepath.Dir(rulesJSONPath)))
+			fmt.Println("Creating new rules.json file with default structure")
+			
+			// Save the new ruleset
+			if err := rs.SaveRuleSet(rulesJSONPath); err != nil {
+				return fmt.Errorf("failed to create rules.json: %w", err)
+			}
+		} else if err != nil {
+			return fmt.Errorf("failed to check rules.json file: %w", err)
+		} else {
+			// Load existing ruleset
+			rs, err = ruleset.LoadRuleSet(rulesJSONPath)
+			if err != nil {
+				return fmt.Errorf("failed to load ruleset: %w", err)
+			}
 		}
 
 		// Check if rules directory exists

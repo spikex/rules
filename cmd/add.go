@@ -2,12 +2,15 @@ package cmd
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 	"strings"
 
-	"github.com/spf13/cobra"
 	"rules-cli/internal/formats"
 	"rules-cli/internal/registry"
 	"rules-cli/internal/ruleset"
+
+	"github.com/spf13/cobra"
 )
 
 // addCmd represents the add command
@@ -51,10 +54,25 @@ When importing from GitHub repositories, the tool will:
 			return fmt.Errorf("failed to get rules.json path: %w", err)
 		}
 		
-		// Load ruleset
-		rs, err := ruleset.LoadRuleSet(rulesJSONPath)
-		if err != nil {
-			return fmt.Errorf("failed to load ruleset: %w", err)
+		// Load ruleset or create a new one if it doesn't exist
+		var rs *ruleset.RuleSet
+		if _, err := os.Stat(rulesJSONPath); os.IsNotExist(err) {
+			// Create directory if it doesn't exist
+			if err := os.MkdirAll(filepath.Dir(rulesJSONPath), 0755); err != nil {
+				return fmt.Errorf("failed to create directory for rules.json: %w", err)
+			}
+			
+			// Create a default ruleset
+			rs = ruleset.DefaultRuleSet(filepath.Base(filepath.Dir(rulesJSONPath)))
+			fmt.Println("Creating new rules.json file with default structure")
+		} else if err != nil {
+			return fmt.Errorf("failed to check rules.json file: %w", err)
+		} else {
+			// Load existing ruleset
+			rs, err = ruleset.LoadRuleSet(rulesJSONPath)
+			if err != nil {
+				return fmt.Errorf("failed to load ruleset: %w", err)
+			}
 		}
 		
 		// Check if rule already exists

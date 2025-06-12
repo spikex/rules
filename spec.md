@@ -105,6 +105,7 @@ rules add gh:owner/repo
 ```
 
 - Adds the rule to rules.json "rules" object
+- If rules.json doesn't exist, creates it with default structure and adds the rule
 - Downloads rule files from the registry to appropriate folder (e.g. `.rules/vercel/nextjs/`)
 - When using `gh:` prefix, downloads the rules from the GitHub repository:
   - By default, imports all files from the `src/` directory in the repository
@@ -179,6 +180,9 @@ rules install --force  # Skip confirmation prompts
 - **Args**:
   - Name of ruleset to add (with optional `gh:` prefix for GitHub repositories)
 - **Behavior**:
+  - Checks if rules.json exists:
+    - If it exists, adds the rule to the existing file
+    - If it doesn't exist, creates a new rules.json with default structure and adds the rule
   - Fetches ruleset from registry or GitHub based on prefix
   - For GitHub repos:
     - Downloads all files from the `src/` directory in the repository
