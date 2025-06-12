@@ -192,6 +192,14 @@ rules install --force  # Skip confirmation prompts
   - Ensures the `.rules` directory exactly matches what's defined in `rules.json`
   - Reports on installation progress and any errors encountered
 
+### `rules login`
+
+Starts the authorization flow using utilities defined in [the auth folder](../internal/auth/) and saves auth information.
+
+### `rules logout`
+
+Logs the user out by removing the auth file. Use utilities defined in [the auth folder](../internal/auth/).
+
 ## Error Handling
 
 - Clear error messages with actionable advice
