@@ -72,90 +72,11 @@ alwaysApply: false
 This is the body of the rule. It supports Markdown syntax.
 ```
 
-## Core Functionality
-
-### 1. Rule Initialization (rules init)
-
-- Creates initial rule directory structure
-- Supports different formats via `--format` flag
-- Default format creates `.rules/` directory
-- Custom formats create `.{format}/rules/` directories
-- Creates empty rules.json with basic structure
-
-### 2. Rule Creation (rules create)
-
-```bash
-# Create new rules with interactive walkthrough that lets you choose triggers and write rules
-rules create
-rules create --tags frontend --globs *.{tsx,jsx} --description "Style guide for writing React components" "This is the body of the rule"
-rules create --alwaysApply # Body not supplied, so will prompt for it interactively
-```
-
-- Interactive mode when parameters not supplied
-- Supports flags for all rule properties (tags, globs, description, alwaysApply)
-- Allows for stdin/editor input for rule body
-- Creates a new rule (.md) file in the root of the rules directory
-- Does not modify the rules.json file at all
-
-### 3. Rule Importing (rules add)
-
-```bash
-rules add vercel/nextjs
-rules add gh:owner/repo
-```
-
-- Adds the rule to rules.json "rules" object
-- If rules.json doesn't exist, creates it with default structure and adds the rule
-- Downloads rule files from the registry to appropriate folder (e.g. `.rules/vercel/nextjs/`)
-- When using `gh:` prefix, downloads the rules from the GitHub repository:
-  - By default, imports all files from the `src/` directory in the repository
-  - Downloads from the main branch of the repository
-- When rules.json doesn't exist:
-  - Check for any top-level folder of the structure ".{folder-name}/rules"
-  - If one exists, print a suggestion to the user to run `rules render {folder-name}` at the very end of the output
-
-### 4. Rule Removal (rules remove)
-
-```bash
-rules remove vercel/nextjs
-rules remove gh:owner/repo
-```
-
-- Removes the rule from rules.json "rules" object
-- Optionally deletes rule files from the local directory (with --delete flag)
-- Provides confirmation prompt before deletion (can be bypassed with --force flag)
-
-### 5. Rule Rendering (rules render)
-
-```bash
-rules render foo
-rules render cursor
-rules render --all  # Renders to all formats specified in config
-```
-
-- Renders existing rules to a specified format
-- Creates `.{format}/rules/` directory (e.g., `.foo/rules/`)
-- Copies all rules from the default location (`.rules/`) to the target format location
-- Can render to multiple formats simultaneously with `--all` flag
-- Preserves directory structure of rule sets
-
-### 6. Rule Installation (rules install)
-
-```bash
-rules install
-rules install --force  # Skip confirmation prompts
-```
-
-- Synchronizes the `.rules` directory with the contents of `rules.json`
-- Performs a clean installation by:
-  - Removing all existing rule files and directories first
-  - Re-downloading and installing all rules specified in `rules.json`
-- Provides confirmation prompt before deleting existing rules (can be bypassed with --force flag)
-- Useful for ensuring the rules directory matches exactly what's defined in `rules.json`
-
-## Command Specifications
+## Commands
 
 ### `rules init`
+
+Creates initial rule directory structure.
 
 - **Flags**:
   - `--format string`: Set rule format (default, cursor, etc.)
@@ -163,8 +84,19 @@ rules install --force  # Skip confirmation prompts
   - Creates directory structure
   - Initializes empty rules.json
   - Sets up format-specific configuration
+  - Default format creates `.rules/` directory
+  - Custom formats create `.{format}/rules/` directories
 
 ### `rules create`
+
+Creates a new rule file in the rules directory.
+
+```bash
+# Create new rules with interactive walkthrough that lets you choose triggers and write rules
+rules create
+rules create --tags frontend --globs *.{tsx,jsx} --description "Style guide for writing React components" "This is the body of the rule"
+rules create --alwaysApply # Body not supplied, so will prompt for it interactively
+```
 
 - **Flags**:
   - `--tags`: Comma-separated list of tags
@@ -175,28 +107,40 @@ rules install --force  # Skip confirmation prompts
   - Optional rule body as last argument
 - **Behavior**:
   - Prompts for missing fields if not provided
-  - Creates rule file in root of the rules directory
+  - Allows for stdin/editor input for rule body
+  - Creates a new rule (.md) file in the root of the rules directory
   - Does not modify the rules.json file
 
 ### `rules add`
 
+Adds a rule to the project.
+
+```bash
+rules add vercel/nextjs
+rules add gh:owner/repo
+```
+
 - **Args**:
   - Name of ruleset to add (with optional `gh:` prefix for GitHub repositories)
 - **Behavior**:
-  - Checks if rules.json exists:
-    - If it exists, adds the rule to the existing file
-    - If it doesn't exist, creates a new rules.json with default structure and adds the rule
-  - Fetches ruleset from registry or GitHub based on prefix
-  - For GitHub repos:
+  - Adds the rule to rules.json "rules" object
+  - If rules.json doesn't exist, creates it with default structure and adds the rule
+  - Downloads rule files from the registry to appropriate folder (e.g. `.rules/vercel/nextjs/`)
+  - For GitHub repos (`gh:` prefix):
     - Downloads all files from the `src/` directory in the repository
     - Uses the main branch by default
-  - Adds to rules.json "rules" object
-  - Validates ruleset exists
   - When rules.json doesn't exist:
-    - Check for any top-level folder of the structure ".{folder-name}/rules"
-    - If one exists, print a suggestion to the user to run `rules render {folder-name}` at the very end of the output
+    - Checks for any top-level folder of the structure ".{folder-name}/rules"
+    - If one exists, suggests to the user to run `rules render {folder-name}`
 
 ### `rules remove`
+
+Removes a rule from the project.
+
+```bash
+rules remove vercel/nextjs
+rules remove gh:owner/repo
+```
 
 - **Args**:
   - Name of ruleset to remove (including GitHub-sourced rules)
@@ -210,10 +154,20 @@ rules install --force  # Skip confirmation prompts
 
 ### `rules render`
 
+Renders existing rules to a specified format.
+
+```bash
+rules render foo
+rules render cursor
+rules render --all  # Renders to all formats specified in config
+```
+
 - **Args**:
   - Name of format to render rules to (e.g., "foo", "continue")
+- **Flags**:
+  - `--all`: Renders to all formats specified in config
 - **Behavior**:
-  - Creates `.{format}/rules/` directory structure
+  - Creates `.{format}/rules/` directory (e.g., `.foo/rules/`)
   - Copies all rules from the default location (`.rules/`) to the target format location
   - Preserves directory structure of rule sets
   - Can perform format-specific transformations if needed
@@ -221,13 +175,21 @@ rules install --force  # Skip confirmation prompts
 
 ### `rules install`
 
+Synchronizes the `.rules` directory with the contents of `rules.json`.
+
+```bash
+rules install
+rules install --force  # Skip confirmation prompts
+```
+
 - **Flags**:
   - `--force`: Skip confirmation prompts
 - **Behavior**:
-  - Removes all existing rule files and directories from `.rules/`
-  - Re-downloads and installs all rules specified in `rules.json`
-  - Confirms before deleting existing rules
-  - Ensures the `.rules` directory exactly matches the specification in `rules.json`
+  - Performs a clean installation by:
+    - Removing all existing rule files and directories first
+    - Re-downloading and installing all rules specified in `rules.json`
+  - Provides confirmation prompt before deleting existing rules
+  - Ensures the `.rules` directory exactly matches what's defined in `rules.json`
   - Reports on installation progress and any errors encountered
 
 ## Error Handling
