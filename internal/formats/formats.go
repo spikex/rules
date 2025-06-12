@@ -43,9 +43,9 @@ func InitializeFormat(formatName string) error {
 	rulesJSONPath := "rules.json"
 	if _, err := os.Stat(rulesJSONPath); os.IsNotExist(err) {
 		defaultRulesJSON := `{
-  "name": "ruleset-name",
-  "description": "Description of the ruleset",
-  "author": "Author Name",
+  "name": "new-rules",
+  "description": "",
+  "author": "",
   "license": "Apache-2.0",
   "version": "1.0.0",
   "rules": {}

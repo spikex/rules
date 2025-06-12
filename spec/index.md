@@ -45,9 +45,9 @@ The `rules.json` file goes in the root of the project, adjacent to the rules dir
 
 ```json
 {
-  "name": "ruleset-name",
-  "description": "Description of the ruleset",
-  "author": "Author Name",
+  "name": "new-rules",
+  "description": "",
+  "author": "",
   "license": "Apache-2.0",
   "version": "1.0.0",
   "rules": {
