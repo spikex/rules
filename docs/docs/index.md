@@ -57,6 +57,7 @@ will copy all of the `.rules/` into a `.continue/rules/` folder.
 To make your rule available to others, you can publish a markdown file using `rules publish`:
 
 ```bash
+rules login
 rules publish my-rule.md --slug my-username/my-rule
 ```
 
