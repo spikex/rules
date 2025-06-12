@@ -112,7 +112,7 @@ rules add gh:owner/repo
   - Downloads from the main branch of the repository
 - When rules.json doesn't exist:
   - Check for any top-level folder of the structure ".{folder-name}/rules"
-  - If one exists, print a suggestion to the user to run `rules render {folder-name}`
+  - If one exists, print a suggestion to the user to run `rules render {folder-name}` at the very end of the output
 
 ### 4. Rule Removal (rules remove)
 
@@ -194,7 +194,7 @@ rules install --force  # Skip confirmation prompts
   - Validates ruleset exists
   - When rules.json doesn't exist:
     - Check for any top-level folder of the structure ".{folder-name}/rules"
-    - If one exists, print a suggestion to the user to run `rules render {folder-name}`
+    - If one exists, print a suggestion to the user to run `rules render {folder-name}` at the very end of the output
 
 ### `rules remove`
 

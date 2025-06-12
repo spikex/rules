@@ -54,17 +54,21 @@ When importing from GitHub repositories, the tool will:
 			return fmt.Errorf("failed to get rules.json path: %w", err)
 		}
 		
-		// Load ruleset or create a new one if it doesn't exist
-		var rs *ruleset.RuleSet
+		// Check for existing format folders, but save this information for later
+		var formatSuggestion string
 		if _, err := os.Stat(rulesJSONPath); os.IsNotExist(err) {
 			// Check for any top-level folder of the structure ".{folder-name}/rules"
 			formatFolders, err := formats.FindRulesFormats()
 			if err == nil && len(formatFolders) > 0 {
-				// Suggest rendering to the user
-				fmt.Printf("Found existing rules folder(s): %s\n", strings.Join(formatFolders, ", "))
-				fmt.Printf("Consider running 'rules render %s' to initialize rules.json from existing rules\n", formatFolders[0])
+				// Save the suggestion for later
+				formatSuggestion = fmt.Sprintf("Found existing rules folder(s): %s\nConsider running 'rules render %s' to initialize rules.json from existing rules", 
+					strings.Join(formatFolders, ", "), formatFolders[0])
 			}
-			
+		}
+		
+		// Load ruleset or create a new one if it doesn't exist
+		var rs *ruleset.RuleSet
+		if _, err := os.Stat(rulesJSONPath); os.IsNotExist(err) {
 			// Create directory if it doesn't exist
 			if err := os.MkdirAll(filepath.Dir(rulesJSONPath), 0755); err != nil {
 				return fmt.Errorf("failed to create directory for rules.json: %w", err)
@@ -110,6 +114,12 @@ When importing from GitHub repositories, the tool will:
 		}
 		
 		fmt.Printf("Rule '%s' (version %s) added successfully\n", ruleName, ruleVersion)
+		
+		// Print format suggestion at the very end if applicable
+		if formatSuggestion != "" {
+			fmt.Println(formatSuggestion)
+		}
+		
 		return nil
 	},
 }
