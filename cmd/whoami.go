@@ -54,9 +54,6 @@ var whoamiCmd = &cobra.Command{
 		if err == nil && client.IsLoggedIn {
 			// Here we would make an API call to get more user information
 			// This would typically include organization details
-			// For now, we'll just display a placeholder message
-			fmt.Println("\nNote: To get additional user information like organization details,")
-			fmt.Println("the registry API would need to provide a user profile endpoint.")
 		}
 	},
 }
