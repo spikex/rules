@@ -15,7 +15,9 @@ import (
 
 // Client represents a registry client
 type Client struct {
-	BaseURL string
+	BaseURL    string
+	AuthToken  string
+	IsLoggedIn bool
 }
 
 // RuleInfo contains information about a rule in the registry
@@ -31,18 +33,43 @@ type RegistryResponse struct {
 	Content string `json:"content"`
 }
 
+// PublishRuleRequest represents the request to publish a new rule version
+type PublishRuleRequest struct {
+	Visibility string `json:"visibility"`
+	Content    string `json:"content"`
+}
+
 // NewClient creates a new registry client
 func NewClient(baseURL string) *Client {
 	return &Client{
-		BaseURL: baseURL,
+		BaseURL:    baseURL,
+		AuthToken:  "",
+		IsLoggedIn: false,
 	}
+}
+
+// SetAuthToken sets the auth token for API requests
+func (c *Client) SetAuthToken(token string) {
+	c.AuthToken = token
+	c.IsLoggedIn = token != ""
 }
 
 // GetRule fetches a rule from the registry
 func (c *Client) GetRule(name, version string) (*RuleInfo, error) {
 	url := fmt.Sprintf("%s/rules/%s/%s", c.BaseURL, name, version)
 	
-	resp, err := http.Get(url)
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request: %w", err)
+	}
+	
+	// Add auth header if logged in
+	if c.IsLoggedIn {
+		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.AuthToken))
+	}
+	
+	client := &http.Client{}
+	resp, err := client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("failed to request rule: %w", err)
 	}
@@ -73,7 +100,18 @@ func (c *Client) DownloadRule(name, version, formatDir string) error {
 		url = fmt.Sprintf("%s/registry/v1/%s/%s", c.BaseURL, name, version)
 	}
 	
-	resp, err := http.Get(url)
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return fmt.Errorf("failed to create request: %w", err)
+	}
+	
+	// Add auth header if logged in
+	if c.IsLoggedIn {
+		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.AuthToken))
+	}
+	
+	client := &http.Client{}
+	resp, err := client.Do(req)
 	if err != nil {
 		return fmt.Errorf("failed to request rule from registry API: %w", err)
 	}
@@ -104,6 +142,48 @@ func (c *Client) DownloadRule(name, version, formatDir string) error {
 	fmt.Printf("Successfully downloaded rule '%s' (version: %s)\n", name, version)
 	fmt.Printf("Rule saved to: %s\n", rulePath)
 	
+	return nil
+}
+
+// PublishRule publishes a new version of a rule to the registry
+func (c *Client) PublishRule(ownerSlug, ruleSlug, content string, visibility string) error {
+	if !c.IsLoggedIn {
+		return fmt.Errorf("you must be logged in to publish a rule")
+	}
+	
+	url := fmt.Sprintf("%s/packages/%s/%s/versions/new", c.BaseURL, ownerSlug, ruleSlug)
+	
+	publishRequest := PublishRuleRequest{
+		Visibility: visibility,
+		Content:    content,
+	}
+	
+	reqBody, err := json.Marshal(publishRequest)
+	if err != nil {
+		return fmt.Errorf("failed to marshal publish request: %w", err)
+	}
+	
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(reqBody))
+	if err != nil {
+		return fmt.Errorf("failed to create publish request: %w", err)
+	}
+	
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.AuthToken))
+	
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return fmt.Errorf("failed to publish rule: %w", err)
+	}
+	defer resp.Body.Close()
+	
+	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusCreated {
+		bodyBytes, _ := ioutil.ReadAll(resp.Body)
+		return fmt.Errorf("failed to publish rule: status %d, response: %s", resp.StatusCode, string(bodyBytes))
+	}
+	
+	fmt.Printf("Successfully published rule '%s/%s'\n", ownerSlug, ruleSlug)
 	return nil
 }
 
