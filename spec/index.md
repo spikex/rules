@@ -26,6 +26,7 @@ rules-cli/
 │   ├── remove.go       # Remove command
 │   ├── render.go       # Render command
 │   ├── install.go      # Install command
+│   ├── publish.go      # Publish command
 ├── internal/
 │   ├── config/         # Configuration management
 │   ├── formats/        # Format handling (cursor, default, etc)
@@ -191,6 +192,27 @@ rules install --force  # Skip confirmation prompts
   - Provides confirmation prompt before deleting existing rules
   - Ensures the `.rules` directory exactly matches what's defined in `rules.json`
   - Reports on installation progress and any errors encountered
+
+### `rules publish`
+
+Publishes a rule file to the registry.
+
+```bash
+rules publish my-rule.md --slug my-org/my-rules
+rules publish my-rule.md --slug my-org/my-rules --visibility private
+```
+
+- **Args**:
+  - Path to the rule file to publish
+- **Flags**:
+  - `--slug`: The organization/ruleset slug to publish to (required)
+  - `--visibility`: Set the visibility of the rule to "public" or "private" (default: "public")
+- **Behavior**:
+  - Reads the content of the specified rule file
+  - Uses the registry API's POST endpoint to publish the rule
+  - Requires user to be logged in (uses Bearer auth)
+  - Sets the visibility of the published rule according to the flag
+  - Returns a confirmation message with the published rule's details
 
 ### `rules login`
 
