@@ -1,6 +1,6 @@
 # Authentication
 
-This CLI program is authenticated using the Device Code Flow with WorkOS AuthKit. The flow looks like this:
+This CLI program is authenticated using the Device Code Flow with the WorkOS Go SDK. The flow looks like this:
 
 ```
 # 1. Device requests codes
@@ -24,5 +24,3 @@ POST /oauth/token
 grant_type=device_code
 device_code=abcxyz...
 ```
-
-We implement it using the WorkOS Go SDK.
