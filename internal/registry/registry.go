@@ -26,6 +26,11 @@ type RuleInfo struct {
 	Files       []string `json:"files"`
 }
 
+// RegistryResponse represents the response from the registry API
+type RegistryResponse struct {
+	Content string `json:"content"`
+}
+
 // NewClient creates a new registry client
 func NewClient(baseURL string) *Client {
 	return &Client{
@@ -62,10 +67,25 @@ func (c *Client) DownloadRule(name, version, formatDir string) error {
 		return c.downloadFromGitHub(name[3:], formatDir)
 	}
 	
-	// Get rule info
-	ruleInfo, err := c.GetRule(name, version)
+	// Use the registry API GET endpoint to fetch rule content
+	url := fmt.Sprintf("%s/registry/v1/%s/latest", c.BaseURL, name)
+	if version != "latest" && version != "" {
+		url = fmt.Sprintf("%s/registry/v1/%s/%s", c.BaseURL, name, version)
+	}
+	
+	resp, err := http.Get(url)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to request rule from registry API: %w", err)
+	}
+	defer resp.Body.Close()
+	
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("failed to fetch rule from registry API: status %d", resp.StatusCode)
+	}
+	
+	var registryResponse RegistryResponse
+	if err := json.NewDecoder(resp.Body).Decode(&registryResponse); err != nil {
+		return fmt.Errorf("failed to decode registry API response: %w", err)
 	}
 	
 	// Create rule directory
@@ -74,54 +94,15 @@ func (c *Client) DownloadRule(name, version, formatDir string) error {
 		return fmt.Errorf("failed to create rule directory: %w", err)
 	}
 	
-	// Download each file
-	downloadedFiles := []string{}
-	for _, file := range ruleInfo.Files {
-		fileURL := fmt.Sprintf("%s/rules/%s/%s/files/%s", c.BaseURL, name, version, file)
-		
-		// Create directory for file if needed
-		fileDir := filepath.Dir(filepath.Join(ruleDir, file))
-		if err := os.MkdirAll(fileDir, 0755); err != nil {
-			return fmt.Errorf("failed to create directory for file %s: %w", file, err)
-		}
-		
-		// Download file
-		resp, err := http.Get(fileURL)
-		if err != nil {
-			return fmt.Errorf("failed to download file %s: %w", file, err)
-		}
-		
-		if resp.StatusCode != http.StatusOK {
-			resp.Body.Close()
-			return fmt.Errorf("failed to download file %s: status %d", file, resp.StatusCode)
-		}
-		
-		// Create file
-		outFile, err := os.Create(filepath.Join(ruleDir, file))
-		if err != nil {
-			resp.Body.Close()
-			return fmt.Errorf("failed to create file %s: %w", file, err)
-		}
-		
-		// Copy contents
-		_, err = io.Copy(outFile, resp.Body)
-		outFile.Close()
-		resp.Body.Close()
-		
-		if err != nil {
-			return fmt.Errorf("failed to write file %s: %w", file, err)
-		}
-		
-		downloadedFiles = append(downloadedFiles, file)
+	// Write the main rule file
+	rulePath := filepath.Join(ruleDir, "index.md")
+	if err := ioutil.WriteFile(rulePath, []byte(registryResponse.Content), 0644); err != nil {
+		return fmt.Errorf("failed to write rule file: %w", err)
 	}
 	
-	// Print summary of downloaded files
+	// Print summary of downloaded rule
 	fmt.Printf("Successfully downloaded rule '%s' (version: %s)\n", name, version)
-	fmt.Printf("Description: %s\n", ruleInfo.Description)
-	fmt.Printf("Downloaded %d files to: %s\n", len(downloadedFiles), ruleDir)
-	for _, file := range downloadedFiles {
-		fmt.Printf("  - %s\n", file)
-	}
+	fmt.Printf("Rule saved to: %s\n", rulePath)
 	
 	return nil
 }

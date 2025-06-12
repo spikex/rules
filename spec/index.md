@@ -125,7 +125,7 @@ rules add gh:owner/repo
 - **Behavior**:
   - Adds the rule to rules.json "rules" object
   - If rules.json doesn't exist, creates it with default structure and adds the rule
-  - Downloads rule files from the registry to appropriate folder (e.g. `.rules/vercel/nextjs/`)
+  - Downloads rule files from the registry to appropriate folder (e.g. `.rules/vercel/nextjs/`) using the [registry API GET endpoint](registry-api.md#get)
   - For GitHub repos (`gh:` prefix):
     - Downloads all files from the `src/` directory in the repository
     - Uses the main branch by default

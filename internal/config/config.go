@@ -18,7 +18,7 @@ type Config struct {
 func Initialize() (*Config, error) {
 	config := Config{
 	// Set defaults
-		RegistryURL:    "https://rules.example.com",
+		RegistryURL:    "https://api.continue.dev",
 		DefaultFormat:  "default",
 		Username:       "",
 		Email:          "",

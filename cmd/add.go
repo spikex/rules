@@ -20,6 +20,9 @@ var addCmd = &cobra.Command{
 	Long: `Add a rule from the registry to the current ruleset.
 The rule will be downloaded and added to the rules.json file.
 
+Rules are downloaded from the registry API using the GET endpoint 
+(e.g., api.continue.dev/registry/v1/<owner-slug>/<rule-slug>/latest).
+
 For GitHub repositories, use the gh: prefix followed by the owner/repo.
 For example: gh:owner/repo
 
@@ -108,7 +111,7 @@ func downloadRule(client *registry.Client, ruleName, ruleVersion, rulesDir strin
 	if strings.HasPrefix(ruleName, "gh:") {
 		fmt.Printf("Downloading rules from GitHub repository '%s' (src/ directory)...\n", ruleName[3:])
 	} else {
-		fmt.Printf("Downloading rule '%s' (version %s)...\n", ruleName, ruleVersion)
+		fmt.Printf("Downloading rule '%s' (version %s) from registry API...\n", ruleName, ruleVersion)
 	}
 	
 	return client.DownloadRule(ruleName, ruleVersion, rulesDir)
