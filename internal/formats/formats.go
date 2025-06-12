@@ -96,3 +96,19 @@ func FindRulesFormats() ([]string, error) {
 
 	return formatFolders, nil
 }
+
+// GetFormatSuggestionMessage returns a standardized message for suggesting format rendering
+// when existing rule format folders are found
+func GetFormatSuggestionMessage() (string, error) {
+	formatFolders, err := FindRulesFormats()
+	if err != nil {
+		return "", err
+	}
+	
+	if len(formatFolders) > 0 {
+		return fmt.Sprintf("Found existing rules folder(s): %s\nConsider running 'rules render %s' to initialize rules.json from existing rules", 
+			strings.Join(formatFolders, ", "), formatFolders[0]), nil
+	}
+	
+	return "", nil
+}

@@ -69,11 +69,10 @@ func setupRulesDirectory(format string) (rulesDir string, rulesJSONPath string, 
 // getFormatSuggestion checks for existing format folders and provides suggestion if needed
 func getFormatSuggestion(rulesJSONPath string) string {
 	if _, err := os.Stat(rulesJSONPath); os.IsNotExist(err) {
-		// Check for any top-level folder of the structure ".{folder-name}/rules"
-		formatFolders, err := formats.FindRulesFormats()
-		if err == nil && len(formatFolders) > 0 {
-			return fmt.Sprintf("Found existing rules folder(s): %s\nConsider running 'rules render %s' to initialize rules.json from existing rules", 
-				strings.Join(formatFolders, ", "), formatFolders[0])
+		// Use the new helper function
+		suggestion, err := formats.GetFormatSuggestionMessage()
+		if err == nil && suggestion != "" {
+			return suggestion
 		}
 	}
 	return ""
