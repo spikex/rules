@@ -1,3 +1,10 @@
+## [1.0.10](https://github.com/continuedev/rules-cli/compare/v1.0.9...v1.0.10) (2025-06-13)
+
+
+### Bug Fixes
+
+* remove --all flag from render command ([46b59ac](https://github.com/continuedev/rules-cli/commit/46b59acbceaaf102b7ba0c963cb7fd53f4c2d513))
+
 ## [1.0.9](https://github.com/continuedev/rules-cli/compare/v1.0.8...v1.0.9) (2025-06-13)
 
 
