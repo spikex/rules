@@ -1,3 +1,10 @@
+## [1.0.8](https://github.com/continuedev/rules-cli/compare/v1.0.7...v1.0.8) (2025-06-13)
+
+
+### Bug Fixes
+
+* bin.js ([e98d9a9](https://github.com/continuedev/rules-cli/commit/e98d9a91f2e8dd3fb12f90a1a4868d23f7f83914))
+
 ## [1.0.7](https://github.com/continuedev/rules-cli/compare/v1.0.6...v1.0.7) (2025-06-13)
 
 
