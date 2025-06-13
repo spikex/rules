@@ -16,8 +16,7 @@ var initCmd = &cobra.Command{
 	Short: "Initialize a new rules directory",
 	Long: `Initialize a new rules directory with the specified format.
 This creates the necessary directory structure and an empty rules.json file.`,
-	Example: `  rules init
-  rules init --format cursor`,
+	Example: `  rules init`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		fmt.Printf("Initializing rules with format: %s\n", format)
 		

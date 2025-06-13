@@ -26,7 +26,7 @@ var rootCmd = &cobra.Command{
 	Short: "Manage rule sets for AI code assistants",
 	Long: `A command-line tool to create, manage, and convert rule sets 
 for code guidance across different AI assistant platforms 
-(Continue, Cursor, Claude Code, Copilot, etc.).`,
+(Continue, Cursor, Windsurf, Copilot, etc.).`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if version {
 			fmt.Printf("rules version %s\n", Version)

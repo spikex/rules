@@ -7,9 +7,10 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/spf13/cobra"
 	"rules-cli/internal/config"
 	"rules-cli/internal/formats"
+
+	"github.com/spf13/cobra"
 )
 
 var (
@@ -24,8 +25,7 @@ var renderCmd = &cobra.Command{
 Creates .{format}/rules/ directory and copies all rules from the default location
 (.rules/) to the target format location. Preserves directory structure of rule sets.`,
 	Example: `  rules render cursor
-  rules render foo
-  rules render --all  # Renders to all formats specified in config`,
+  rules render continue`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var formatList []string
 

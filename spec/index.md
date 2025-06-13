@@ -2,7 +2,7 @@
 
 ## Overview
 
-A command-line tool to create, manage, and convert rule sets for code guidance across different AI assistant platforms (Continue, Cursor, Claude Code, Copilot, etc.). The tool allows for creating rule sets in different formats and locations, managing rules, and publishing them to a central registry.
+A command-line tool to create, manage, and convert rule sets for code guidance across different AI assistant platforms (Continue, Cursor, Windsurf, Copilot, etc.). The tool allows for creating rule sets in different formats and locations, managing rules, and publishing them to a central registry.
 
 ## Technologies & Dependencies
 
@@ -30,7 +30,7 @@ rules-cli/
 │   ├── whoami.go       # Whoami command
 ├── internal/
 │   ├── config/         # Configuration management
-│   ├── formats/        # Format handling (cursor, default, etc)
+│   ├── formats/        # Format handling
 │   ├── registry/       # Registry client
 │   ├── ruleset/        # Rule set management
 │   └── generators/     # Rule generators
@@ -81,7 +81,7 @@ This is the body of the rule. It supports Markdown syntax.
 Creates initial rule directory structure.
 
 - **Flags**:
-  - `--format string`: Set rule format (default, cursor, etc.)
+  - `--format string`: Set rule format
 - **Behavior**:
   - Creates directory structure
   - Initializes empty rules.json
@@ -159,9 +159,8 @@ rules remove gh:owner/repo
 Renders existing rules to a specified format.
 
 ```bash
-rules render foo
 rules render cursor
-rules render --all  # Renders to all formats specified in config
+rules render continue
 ```
 
 - **Args**:

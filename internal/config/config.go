@@ -35,7 +35,7 @@ func Initialize() (*Config, error) {
 	viper.SetDefault("default_format", "default")
 	viper.SetDefault("username", "")
 	viper.SetDefault("email", "")
-	viper.SetDefault("formats", []string{"default", "cursor"})
+	viper.SetDefault("formats", []string{"default"})
 	
 	// Set default values for auth-related configurations
 	viper.SetDefault("workos_client_id", "client_01J0FW6XN8N2XJAECF7NE0Y65J")
