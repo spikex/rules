@@ -138,10 +138,6 @@ func (c *Client) DownloadRule(name, version, formatDir string) error {
 		return fmt.Errorf("failed to write rule file: %w", err)
 	}
 	
-	// Print summary of downloaded rule
-	fmt.Printf("Successfully downloaded rule '%s' (version: %s)\n", name, version)
-	fmt.Printf("Rule saved to: %s\n", rulePath)
-	
 	return nil
 }
 
@@ -304,13 +300,6 @@ func (c *Client) downloadFromGitHub(repoPath string, formatDir string) error {
 			fileList.WriteString("  - " + file.Name + "\n")
 		}
 		return fmt.Errorf("no rules found in the src/ directory of the GitHub repository.\n%s", fileList.String())
-	}
-	
-	// Print summary of downloaded files
-	fmt.Printf("Successfully downloaded rules from GitHub repository: %s\n", repoPath)
-	fmt.Printf("Downloaded %d files to: %s\n", len(downloadedFiles), ruleDir)
-	for _, file := range downloadedFiles {
-		fmt.Printf("  - %s\n", file)
 	}
 	
 	return nil
