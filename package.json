@@ -1,6 +1,6 @@
 {
   "name": "rules-cli",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Rules CLI tool",
   "bin": {
     "rules": "./bin.js"
@@ -30,12 +30,12 @@
     "node": ">=12"
   },
   "devDependencies": {
-    "tar": "^6.2.0",
     "@semantic-release/changelog": "^6.0.3",
     "@semantic-release/git": "^10.0.1",
-    "@semantic-release/github": "^9.2.3",
-    "@semantic-release/npm": "^10.0.5",
-    "semantic-release": "^21.1.1"
+    "@semantic-release/github": "^9.2.6",
+    "@semantic-release/npm": "^10.0.6",
+    "semantic-release": "^21.1.2",
+    "tar": "^6.2.0"
   },
   "publishConfig": {
     "access": "public"
