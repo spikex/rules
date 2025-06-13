@@ -2,9 +2,6 @@
   "name": "rules-cli",
   "version": "1.0.0",
   "description": "Rules CLI tool",
-  "bin": {
-    "rules": "./bin.js"
-  },
   "files": [
     "bin.js",
     "bin/"
