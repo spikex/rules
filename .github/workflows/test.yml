@@ -58,19 +58,19 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: rules-cli-macos-x64
-          path: bin/macos-x64/rules-cli
+          path: bin/darwin-amd64/rules-cli
           retention-days: 7
 
       - name: Upload macOS ARM64 binary
         uses: actions/upload-artifact@v4
         with:
           name: rules-cli-macos-arm64
-          path: bin/macos-arm64/rules-cli
+          path: bin/darwin-arm64/rules-cli
           retention-days: 7
 
       - name: Upload Windows x64 binary
         uses: actions/upload-artifact@v4
         with:
           name: rules-cli-windows-x64
-          path: bin/windows-x64/rules-cli.exe
+          path: bin/win32-x64/rules-cli.exe
           retention-days: 7
