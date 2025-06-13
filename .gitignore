@@ -5,6 +5,13 @@ rules-cli
 /rules
 test-rule.yaml
 
+.github
+.sourcegraph
+.continue
+.clinerules
+.cursor
+.windsurf
+
 # NPM distribution
 node_modules/
 bin/
