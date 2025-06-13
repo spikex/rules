@@ -1,3 +1,10 @@
+## [1.0.5](https://github.com/continuedev/rules-cli/compare/v1.0.4...v1.0.5) (2025-06-13)
+
+
+### Bug Fixes
+
+* release binary names ([8c684a3](https://github.com/continuedev/rules-cli/commit/8c684a307e88ed6acd6fa2c8d1b274d680cda4c0))
+
 ## [1.0.4](https://github.com/continuedev/rules-cli/compare/v1.0.3...v1.0.4) (2025-06-13)
 
 
