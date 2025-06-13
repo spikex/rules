@@ -56,15 +56,27 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: npx semantic-release
 
+      - name: Rename binaries with platform suffixes
+        if: steps.semantic.outputs.new_release_published == 'true'
+        run: |
+          VERSION=${{ steps.semantic.outputs.new_release_version }}
+          mkdir -p dist
+          cp bin/darwin-amd64/rules-cli dist/rules-cli-${VERSION}-darwin-amd64
+          cp bin/darwin-arm64/rules-cli dist/rules-cli-${VERSION}-darwin-arm64
+          cp bin/linux-x64/rules-cli dist/rules-cli-${VERSION}-linux-x64
+          cp bin/linux-arm64/rules-cli dist/rules-cli-${VERSION}-linux-arm64
+          cp bin/win32-x64/rules-cli.exe dist/rules-cli-${VERSION}-win32-x64.exe
+
       - name: Upload binaries to release
         uses: softprops/action-gh-release@v1
         if: steps.semantic.outputs.new_release_published == 'true'
         with:
+          tag_name: v${{ steps.semantic.outputs.new_release_version }}
           files: |
-            bin/darwin-amd64/rules-cli
-            bin/darwin-arm64/rules-cli
-            bin/linux-x64/rules-cli
-            bin/linux-arm64/rules-cli
-            bin/win32-x64/rules-cli.exe
+            dist/rules-cli-${{ steps.semantic.outputs.new_release_version }}-darwin-amd64
+            dist/rules-cli-${{ steps.semantic.outputs.new_release_version }}-darwin-arm64
+            dist/rules-cli-${{ steps.semantic.outputs.new_release_version }}-linux-x64
+            dist/rules-cli-${{ steps.semantic.outputs.new_release_version }}-linux-arm64
+            dist/rules-cli-${{ steps.semantic.outputs.new_release_version }}-win32-x64.exe
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
