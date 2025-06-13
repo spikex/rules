@@ -119,10 +119,10 @@ func TransformMetadata(metadata RuleMetadata, format Format) (RuleMetadata, erro
 			delete(transformed, "alwaysApply")
 			
 			// If alwaysApply is true, set trigger to always_on
-			// If alwaysApply is false, set trigger to manual
 			if alwaysApply == true {
 				transformed["trigger"] = "always_on"
 			} else {
+			// If alwaysApply is false, set trigger to manual
 				transformed["trigger"] = "manual"
 			}
 		} else {
