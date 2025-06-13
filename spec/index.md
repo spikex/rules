@@ -164,12 +164,9 @@ rules render continue
 ```
 
 - **Args**:
-  - Name of format to render rules to (e.g., "foo", "continue")
+  - Name of format to render rules to (e.g. "continue", "cursor")
 - **Behavior**:
-  - Creates `.{format}/rules/` directory (e.g., `.foo/rules/`)
-  - Copies all rules from the default location (`.rules/`) to the target format location
-  - Preserves directory structure of rule sets
-  - Can perform format-specific transformations if needed
+  - Copies all rules from the default location (`.rules/`) to the target format as described in [render-formats.md](render-formats.md)
   - Does not modify the original rule files
 
 ### `rules install`

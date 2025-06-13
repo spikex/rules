@@ -11,6 +11,9 @@ import (
 type Format struct {
 	Name            string
 	DirectoryPrefix string
+	FileExtension   string
+	IsSingleFile    bool
+	SingleFilePath  string
 }
 
 // GetFormat returns a Format for the given format name
@@ -20,13 +23,87 @@ func GetFormat(formatName string) Format {
 		return Format{
 			Name:            "default",
 			DirectoryPrefix: ".rules",
+			FileExtension:   ".md",
+			IsSingleFile:    false,
 		}
 	}
 	
-	// Otherwise use .<format>/rules
-	return Format{
-		Name:            formatName,
-		DirectoryPrefix: fmt.Sprintf(".%s/rules", formatName),
+	// Define formats based on render-formats.md
+	switch formatName {
+	case "continue":
+		return Format{
+			Name:            "continue",
+			DirectoryPrefix: ".continue/rules",
+			FileExtension:   ".md",
+			IsSingleFile:    false,
+		}
+	case "cursor":
+		return Format{
+			Name:            "cursor",
+			DirectoryPrefix: ".cursor/rules",
+			FileExtension:   ".mdc",
+			IsSingleFile:    false,
+		}
+	case "windsurf":
+		return Format{
+			Name:            "windsurf",
+			DirectoryPrefix: ".windsurf/rules",
+			FileExtension:   ".md",
+			IsSingleFile:    false,
+		}
+	case "claude":
+		return Format{
+			Name:            "claude",
+			DirectoryPrefix: "",
+			FileExtension:   ".md",
+			IsSingleFile:    true,
+			SingleFilePath:  "CLAUDE.md",
+		}
+	case "copilot":
+		return Format{
+			Name:            "copilot",
+			DirectoryPrefix: ".github/instructions",
+			FileExtension:   ".instructions.md",
+			IsSingleFile:    false,
+		}
+	case "codex":
+		return Format{
+			Name:            "codex",
+			DirectoryPrefix: "",
+			FileExtension:   ".md",
+			IsSingleFile:    true,
+			SingleFilePath:  "AGENT.md",
+		}
+	case "cline":
+		return Format{
+			Name:            "cline",
+			DirectoryPrefix: ".clinerules",
+			FileExtension:   ".md",
+			IsSingleFile:    false,
+		}
+	case "cody":
+		return Format{
+			Name:            "cody",
+			DirectoryPrefix: ".sourcegraph",
+			FileExtension:   ".rule.md",
+			IsSingleFile:    false,
+		}
+	case "amp":
+		return Format{
+			Name:            "amp",
+			DirectoryPrefix: "",
+			FileExtension:   ".md",
+			IsSingleFile:    true,
+			SingleFilePath:  "AGENT.md",
+		}
+	default:
+		// For any other format, use .<format>/rules
+		return Format{
+			Name:            formatName,
+			DirectoryPrefix: fmt.Sprintf(".%s/rules", formatName),
+			FileExtension:   ".md",
+			IsSingleFile:    false,
+		}
 	}
 }
 	
@@ -34,9 +111,11 @@ func GetFormat(formatName string) Format {
 func InitializeFormat(formatName string) error {
 	format := GetFormat(formatName)
 	
-	dirPath := format.DirectoryPrefix
-	if err := os.MkdirAll(dirPath, 0755); err != nil {
-		return fmt.Errorf("failed to create directory %s: %w", dirPath, err)
+	if !format.IsSingleFile {
+		dirPath := format.DirectoryPrefix
+		if err := os.MkdirAll(dirPath, 0755); err != nil {
+			return fmt.Errorf("failed to create directory %s: %w", dirPath, err)
+		}
 	}
 	
 	// Create rules.json in the root directory if it doesn't exist
@@ -111,4 +190,10 @@ func GetFormatSuggestionMessage() (string, error) {
 	}
 	
 	return "", nil
+}
+
+// RenderRules renders rules from the source directory to the target format
+func RenderRules(sourceDir string, targetFormat Format) error {
+	// Use the transformer to process the rule files
+	return ProcessRuleFiles(sourceDir, targetFormat)
 }
