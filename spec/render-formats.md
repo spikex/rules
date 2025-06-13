@@ -43,7 +43,7 @@ Most formats require just placing the markdown files in a new folder, maintainin
 
   ```md
   ---
-  trigger: [manual, always_on]
+  trigger: manual # Or `trigger: always_on`, which is the equivalent of alwaysApply
   description: This is a description
   globs: "**/*.tsx"
   ---

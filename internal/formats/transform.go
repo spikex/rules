@@ -118,16 +118,16 @@ func TransformMetadata(metadata RuleMetadata, format Format) (RuleMetadata, erro
 		if alwaysApply, ok := metadata["alwaysApply"]; ok {
 			delete(transformed, "alwaysApply")
 			
-			// If alwaysApply is true, set trigger to [manual, always_on]
-			// If alwaysApply is false, set trigger to [manual]
+			// If alwaysApply is true, set trigger to always_on
+			// If alwaysApply is false, set trigger to manual
 			if alwaysApply == true {
-				transformed["trigger"] = []string{"manual", "always_on"}
+				transformed["trigger"] = "always_on"
 			} else {
-				transformed["trigger"] = []string{"manual"}
+				transformed["trigger"] = "manual"
 			}
 		} else {
 			// Default to manual trigger
-			transformed["trigger"] = []string{"manual"}
+			transformed["trigger"] = "manual"
 		}
 		
 		// Keep description and globs
