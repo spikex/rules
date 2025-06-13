@@ -7,14 +7,9 @@ import (
 	"path/filepath"
 	"strings"
 
-	"rules-cli/internal/config"
 	"rules-cli/internal/formats"
 
 	"github.com/spf13/cobra"
-)
-
-var (
-	renderAll bool
 )
 
 // renderCmd represents the render command
@@ -27,23 +22,14 @@ Creates .{format}/rules/ directory and copies all rules from the default locatio
 	Example: `  rules render cursor
   rules render continue`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		var formatList []string
-
-		if renderAll {
-			// Get all formats from config
-			cfg, err := config.LoadConfig()
-			if err != nil {
-				return fmt.Errorf("failed to load config: %w", err)
-			}
-			formatList = cfg.Formats
-			if len(formatList) == 0 {
-				return fmt.Errorf("no formats specified in config")
-			}
-		} else {
-			if len(args) < 1 {
-				return fmt.Errorf("format is required when --all flag is not used")
-			}
-			formatList = []string{args[0]}
+		if len(args) < 1 {
+			return fmt.Errorf("format is required")
+		}
+		
+		formatName := args[0]
+		
+		if formatName == "default" {
+			return fmt.Errorf("cannot render to default format as it is the source")
 		}
 
 		// Get the source directory
@@ -56,32 +42,25 @@ Creates .{format}/rules/ directory and copies all rules from the default locatio
 			return fmt.Errorf("source directory %s does not exist", sourceDir)
 		}
 
-		for _, formatName := range formatList {
-			if formatName == "default" {
-				fmt.Println("Skipping default format as it is the source")
-				continue
-			}
-
-			fmt.Printf("Rendering rules to %s format...\n", formatName)
-			
-			// Get target directory
-			targetDir, err := formats.GetRulesDirectory(formatName)
-			if err != nil {
-				return fmt.Errorf("failed to get target directory for format %s: %w", formatName, err)
-			}
-
-			// Create target directory if it doesn't exist
-			if err := os.MkdirAll(targetDir, 0755); err != nil {
-				return fmt.Errorf("failed to create target directory %s: %w", targetDir, err)
-			}
-
-			// Copy rules from source to target
-			if err := copyDir(sourceDir, targetDir); err != nil {
-				return fmt.Errorf("failed to copy rules to target directory: %w", err)
-			}
-
-			fmt.Printf("Successfully rendered rules to %s format\n", formatName)
+		fmt.Printf("Rendering rules to %s format...\n", formatName)
+		
+		// Get target directory
+		targetDir, err := formats.GetRulesDirectory(formatName)
+		if err != nil {
+			return fmt.Errorf("failed to get target directory for format %s: %w", formatName, err)
 		}
+
+		// Create target directory if it doesn't exist
+		if err := os.MkdirAll(targetDir, 0755); err != nil {
+			return fmt.Errorf("failed to create target directory %s: %w", targetDir, err)
+		}
+
+		// Copy rules from source to target
+		if err := copyDir(sourceDir, targetDir); err != nil {
+			return fmt.Errorf("failed to copy rules to target directory: %w", err)
+		}
+
+		fmt.Printf("Successfully rendered rules to %s format\n", formatName)
 
 		return nil
 	},
@@ -159,5 +138,4 @@ func copyFile(src, dst string) error {
 
 func init() {
 	rootCmd.AddCommand(renderCmd)
-	renderCmd.Flags().BoolVar(&renderAll, "all", false, "Render to all formats specified in config")
 }

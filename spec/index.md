@@ -165,8 +165,6 @@ rules render continue
 
 - **Args**:
   - Name of format to render rules to (e.g., "foo", "continue")
-- **Flags**:
-  - `--all`: Renders to all formats specified in config
 - **Behavior**:
   - Creates `.{format}/rules/` directory (e.g., `.foo/rules/`)
   - Copies all rules from the default location (`.rules/`) to the target format location
