@@ -1,0 +1,33 @@
+# Development files
+.git/
+.github/
+.vscode/
+.idea/
+
+# Go source files
+*.go
+go.mod
+go.sum
+cmd/
+internal/
+docs/
+spec/
+
+# Build artifacts
+build.js
+
+# Tests
+*_test.go
+**/tests/
+
+# Documentation
+README.md
+LICENSE
+docs/
+
+# Configuration files
+.gitignore
+rules.json
+
+# Keep only the bin directory with compiled binaries
+!/bin/

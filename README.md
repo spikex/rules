@@ -2,27 +2,50 @@
 
 This is a private Homebrew tap for internal Continue Dev tools.
 
-## Prerequisites
+## Installation Options
+
+### Option 1: Using NPM (Cross-platform)
+
+You can install and run the rules CLI using npm:
+
+```bash
+# Install globally
+npm install -g rules-cli
+
+# Run the CLI
+rules-cli
+
+# Or run directly without installing
+npx rules-cli
+```
+
+The npm package provides binaries for:
+
+- macOS (x64, arm64)
+- Linux (x64, arm64)
+- Windows (x64)
+
+### Option 2: Using Homebrew (macOS/Linux)
+
+#### Prerequisites
 
 - You must have [Homebrew](https://brew.sh/) installed
 - You need Git SSH access to the private repositories at Continue Dev
 
-## Installation Instructions
-
-### 1. Tap the Repository
+#### 1. Tap the Repository
 
 ```bash
 # Using SSH (recommended for private repos)
 brew tap continuedev/tap git@github.com:continuedev/homebrew-tap.git
 ```
 
-### 2. Install the Rules CLI Tool
+#### 2. Install the Rules CLI Tool
 
 ```bash
 brew install rules
 ```
 
-### Updating
+#### Updating
 
 To get the latest version:
 

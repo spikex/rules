@@ -4,3 +4,10 @@ rules-cli
 .rules
 /rules
 test-rule.yaml
+
+# NPM distribution
+node_modules/
+bin/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*

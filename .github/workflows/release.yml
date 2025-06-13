@@ -1,0 +1,59 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+      - master
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Setup Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.24.2'
+          check-latest: true
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+          registry-url: 'https://registry.npmjs.org'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Install semantic-release and plugins
+        run: npm install -D semantic-release @semantic-release/changelog @semantic-release/git @semantic-release/github @semantic-release/npm
+      
+      - name: Build binaries
+        run: node build.js
+      
+      - name: Semantic Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npx semantic-release
+
+      - name: Upload binaries to release
+        uses: softprops/action-gh-release@v1
+        if: steps.semantic.outputs.new_release_published == 'true'
+        with:
+          files: |
+            bin/darwin-amd64/rules-cli
+            bin/darwin-arm64/rules-cli
+            bin/linux-x64/rules-cli
+            bin/linux-arm64/rules-cli
+            bin/win32-x64/rules-cli.exe
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

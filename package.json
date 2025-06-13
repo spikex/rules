@@ -1,0 +1,47 @@
+{
+  "name": "rules-cli",
+  "version": "0.1.0",
+  "description": "Rules CLI tool",
+  "bin": {
+    "rules": "./bin.js"
+  },
+  "files": [
+    "bin.js",
+    "bin/"
+  ],
+  "scripts": {
+    "build": "node build.js",
+    "prepublishOnly": "npm run build",
+    "semantic-release": "semantic-release"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "os": [
+    "darwin",
+    "linux",
+    "win32"
+  ],
+  "cpu": [
+    "x64",
+    "arm64"
+  ],
+  "engines": {
+    "node": ">=12"
+  },
+  "devDependencies": {
+    "tar": "^6.2.0",
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/git": "^10.0.1",
+    "@semantic-release/github": "^9.2.3",
+    "@semantic-release/npm": "^10.0.5",
+    "semantic-release": "^21.1.1"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/continuedev/rules-cli.git"
+  }
+}
