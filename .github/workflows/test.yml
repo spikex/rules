@@ -40,9 +40,37 @@ jobs:
           chmod +x bin/linux-x64/rules-cli
           ./bin/linux-x64/rules-cli --version
 
-      - name: Upload binaries as artifacts
+      - name: Upload Linux x64 binary
         uses: actions/upload-artifact@v4
         with:
-          name: rules-cli-binaries
-          path: bin/
+          name: rules-cli-linux-x64
+          path: bin/linux-x64/rules-cli
+          retention-days: 7
+
+      - name: Upload Linux ARM64 binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: rules-cli-linux-arm64
+          path: bin/linux-arm64/rules-cli
+          retention-days: 7
+
+      - name: Upload macOS x64 binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: rules-cli-macos-x64
+          path: bin/macos-x64/rules-cli
+          retention-days: 7
+
+      - name: Upload macOS ARM64 binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: rules-cli-macos-arm64
+          path: bin/macos-arm64/rules-cli
+          retention-days: 7
+
+      - name: Upload Windows x64 binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: rules-cli-windows-x64
+          path: bin/windows-x64/rules-cli.exe
           retention-days: 7
