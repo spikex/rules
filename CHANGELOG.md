@@ -1,3 +1,10 @@
+## [1.0.6](https://github.com/continuedev/rules-cli/compare/v1.0.5...v1.0.6) (2025-06-13)
+
+
+### Bug Fixes
+
+* test release ([bb14457](https://github.com/continuedev/rules-cli/commit/bb14457deb09b63759a0ae43742099c668b24668))
+
 ## [1.0.5](https://github.com/continuedev/rules-cli/compare/v1.0.4...v1.0.5) (2025-06-13)
 
 
