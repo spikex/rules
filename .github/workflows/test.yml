@@ -2,9 +2,9 @@ name: Test
 
 on:
   push:
-    branches: [ '*' ]
+    branches: ["*"]
   pull_request:
-    branches: [ main, master ]
+    branches: [main, master]
 
 jobs:
   test:
@@ -13,29 +13,36 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-      
+
       - name: Setup Go
         uses: actions/setup-go@v4
         with:
-          go-version: '1.24.2'
+          go-version: "1.24.2"
           check-latest: true
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 20
-          cache: 'npm'
-      
+          cache: "npm"
+
       - name: Install dependencies
         run: npm ci
-      
+
       - name: Run Go tests
         run: go test ./...
-      
+
       - name: Build binaries
         run: node build.js
-      
+
       - name: Test binary execution (Linux)
         run: |
           chmod +x bin/linux-x64/rules-cli
           ./bin/linux-x64/rules-cli --version
+
+      - name: Upload binaries as artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: rules-cli-binaries
+          path: bin/
+          retention-days: 7
