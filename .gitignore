@@ -11,6 +11,8 @@ test-rule.yaml
 .clinerules
 .cursor
 .windsurf
+AGENT.md
+CLAUDE.md
 
 # NPM distribution
 node_modules/
