@@ -1,28 +1,49 @@
 {
-  "branches": ["main", "master"],
+  "branches": ["main"],
   "plugins": [
     "@semantic-release/commit-analyzer",
     "@semantic-release/release-notes-generator",
-    ["@semantic-release/changelog", {
-      "changelogFile": "CHANGELOG.md"
-    }],
-    ["@semantic-release/npm", {
-      "pkgRoot": ".",
-      "tarballDir": "dist"
-    }],
-    ["@semantic-release/git", {
-      "assets": ["package.json", "CHANGELOG.md"],
-      "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
-    }],
-    ["@semantic-release/github", {
-      "assets": [
-        {"path": "dist/*.tgz", "label": "NPM package"},
-        {"path": "bin/darwin-amd64/rules-cli", "label": "macOS x64 binary"},
-        {"path": "bin/darwin-arm64/rules-cli", "label": "macOS arm64 binary"},
-        {"path": "bin/linux-x64/rules-cli", "label": "Linux x64 binary"},
-        {"path": "bin/linux-arm64/rules-cli", "label": "Linux arm64 binary"},
-        {"path": "bin/win32-x64/rules-cli.exe", "label": "Windows x64 binary"}
-      ]
-    }]
+    [
+      "@semantic-release/changelog",
+      {
+        "changelogFile": "CHANGELOG.md"
+      }
+    ],
+    [
+      "@semantic-release/npm",
+      {
+        "pkgRoot": ".",
+        "tarballDir": "dist"
+      }
+    ],
+    [
+      "@semantic-release/git",
+      {
+        "assets": ["package.json", "CHANGELOG.md"],
+        "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
+      }
+    ],
+    [
+      "@semantic-release/github",
+      {
+        "assets": [
+          { "path": "dist/*.tgz", "label": "NPM package" },
+          { "path": "bin/darwin-amd64/rules-cli", "label": "macOS x64 binary" },
+          {
+            "path": "bin/darwin-arm64/rules-cli",
+            "label": "macOS arm64 binary"
+          },
+          { "path": "bin/linux-x64/rules-cli", "label": "Linux x64 binary" },
+          {
+            "path": "bin/linux-arm64/rules-cli",
+            "label": "Linux arm64 binary"
+          },
+          {
+            "path": "bin/win32-x64/rules-cli.exe",
+            "label": "Windows x64 binary"
+          }
+        ]
+      }
+    ]
   ]
 }
