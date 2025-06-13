@@ -1,11 +1,11 @@
 package cmd
 
 import (
-	"fmt"
 	"os"
 
 	"rules-cli/internal/config"
 
+	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 )
 
@@ -29,7 +29,7 @@ for code guidance across different AI assistant platforms
 (Continue, Cursor, Windsurf, Copilot, etc.).`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if version {
-			fmt.Printf("rules version %s\n", Version)
+			color.Cyan("rules version %s", Version)
 			return
 		}
 		// If no subcommand is specified and no version flag, show help
@@ -58,7 +58,7 @@ func initConfig() {
 	var err error
 	cfg, err = config.Initialize()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error initializing config: %v\n", err)
+		color.Red("Error initializing config: %v", err)
 		os.Exit(1)
 	}
 

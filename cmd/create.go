@@ -6,9 +6,11 @@ import (
 	"os"
 	"strings"
 
+	"rules-cli/internal/ruleset"
+
+	"github.com/fatih/color"
 	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
-	"rules-cli/internal/ruleset"
 )
 
 var (
@@ -81,7 +83,7 @@ This command does not modify the rules.json file.`,
 		if len(args) > 1 {
 			rule.Body = args[1]
 		} else {
-			fmt.Println("Enter rule body (press Ctrl+D on a new line when done):")
+			color.Cyan("Enter rule body (press Ctrl+D on a new line when done):")
 			scanner := bufio.NewScanner(os.Stdin)
 			var bodyLines []string
 			for scanner.Scan() {
@@ -98,7 +100,7 @@ This command does not modify the rules.json file.`,
 			return fmt.Errorf("failed to create rule: %w", err)
 		}
 
-		fmt.Printf("Rule '%s' created successfully\n", ruleName)
+		color.Green("Rule '%s' created successfully", ruleName)
 		return nil
 	},
 }

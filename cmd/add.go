@@ -10,6 +10,7 @@ import (
 	"rules-cli/internal/registry"
 	"rules-cli/internal/ruleset"
 
+	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 )
 
@@ -91,7 +92,7 @@ func loadOrCreateRuleSet(rulesJSONPath string) (*ruleset.RuleSet, error) {
 		
 		// Create a default ruleset
 		rs := ruleset.DefaultRuleSet(filepath.Base(filepath.Dir(rulesJSONPath)))
-		fmt.Println("Creating new rules.json file with default structure")
+		color.Cyan("Creating new rules.json file with default structure")
 		return rs, nil
 	} else if err != nil {
 		return nil, fmt.Errorf("failed to check rules.json file: %w", err)
@@ -109,9 +110,9 @@ func loadOrCreateRuleSet(rulesJSONPath string) (*ruleset.RuleSet, error) {
 // downloadRule downloads a rule from the registry
 func downloadRule(client *registry.Client, ruleName, ruleVersion, rulesDir string) error {
 	if strings.HasPrefix(ruleName, "gh:") {
-		fmt.Printf("Downloading rules from GitHub repository '%s' (src/ directory)...\n", ruleName[3:])
+		color.Cyan("Downloading rules from GitHub repository '%s' (src/ directory)...", ruleName[3:])
 	} else {
-		fmt.Printf("Downloading rule '%s' (version %s) from registry API...\n", ruleName, ruleVersion)
+		color.Cyan("Downloading rule '%s' (version %s) from registry API...", ruleName, ruleVersion)
 	}
 	
 	return client.DownloadRule(ruleName, ruleVersion, rulesDir)
@@ -157,7 +158,7 @@ func runAddCommand(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("failed to save ruleset: %w", err)
 	}
 	
-	fmt.Printf("Rule '%s' (version %s) added successfully\n", ruleName, ruleVersion)
+	color.Green("Rule '%s' (version %s) added successfully", ruleName, ruleVersion)
 	
 	// Print format suggestion at the very end if applicable
 	if formatSuggestion != "" {
