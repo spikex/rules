@@ -72,9 +72,9 @@ func TransformRuleContent(content []byte, format Format) ([]byte, error) {
 		return nil, err
 	}
 	
-	// If no metadata (or empty), just return the body content
+	// If no metadata (or empty), just return the trimmed body content
 	if len(transformedMetadata) == 0 {
-		return bodyContent, nil
+		return bytes.TrimSpace(bodyContent), nil
 	}
 	
 	// Serialize metadata to YAML

@@ -55,8 +55,10 @@ func renderToSingleFile(sourceDir string, format Format) error {
 			// Add the rule to the combined content
 			combinedContent.WriteString(fmt.Sprintf("## %s\n\n", title))
 			
-			// Add the content without frontmatter
+			// Add the content without frontmatter, trimming any leading whitespace
 			ruleContent := stripFrontmatter(content)
+			// Ensure there's no trailing whitespace after each rule
+			ruleContent = bytes.TrimRight(ruleContent, " \t\n\r")
 			combinedContent.Write(ruleContent)
 			combinedContent.WriteString("\n\n")
 		}
@@ -117,6 +119,7 @@ func hasFrontmatter(content []byte) bool {
 }
 
 // stripFrontmatter removes the frontmatter from a rule file
+// and trims any leading whitespace from the markdown content
 func stripFrontmatter(content []byte) []byte {
 	// Check if the file has frontmatter
 	if !hasFrontmatter(content) {
@@ -130,5 +133,6 @@ func stripFrontmatter(content []byte) []byte {
 		return content
 	}
 	
-	return bodyContent
+	// Trim leading whitespace from the body content
+	return bytes.TrimLeft(bodyContent, " \t\n\r")
 }
