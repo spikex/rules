@@ -1,3 +1,10 @@
+## [1.0.9](https://github.com/continuedev/rules-cli/compare/v1.0.8...v1.0.9) (2025-06-13)
+
+
+### Bug Fixes
+
+* update license to apache-2.0 ([81862be](https://github.com/continuedev/rules-cli/commit/81862be4e09637a9931f61c4bad5af5aa9e67441))
+
 ## [1.0.8](https://github.com/continuedev/rules-cli/compare/v1.0.7...v1.0.8) (2025-06-13)
 
 
