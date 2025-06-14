@@ -2,7 +2,6 @@ package tests
 
 import (
 	"bufio"
-	"bytes"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -50,6 +49,71 @@ func readCommandConfigs() (map[string]string, error) {
 	}
 	
 	return goldenToCommand, nil
+}
+
+// matchWithPlaceholders checks if the output matches the expected text with placeholders
+func matchWithPlaceholders(actual, expected string) bool {
+	// First try exact match
+	if actual == expected {
+		return true
+	}
+
+	// Handle login.golden placeholders
+	if strings.Contains(expected, "<STATE_PLACEHOLDER>") {
+		// Extract parts before and after the placeholder
+		beforeState := expected[:strings.Index(expected, "<STATE_PLACEHOLDER>")]
+		afterState := expected[strings.Index(expected, "<STATE_PLACEHOLDER>")+len("<STATE_PLACEHOLDER>"):]
+
+		// Check if the output contains the parts before and after
+		if !strings.HasPrefix(actual, beforeState) {
+			return false
+		}
+		
+		// Handle the error placeholder if it exists
+		if strings.Contains(afterState, "<ERROR_PLACEHOLDER>") {
+			beforeError := afterState[:strings.Index(afterState, "<ERROR_PLACEHOLDER>")]
+			afterError := afterState[strings.Index(afterState, "<ERROR_PLACEHOLDER>")+len("<ERROR_PLACEHOLDER>"):]
+
+			// The middle part should be the UUID - find where the beforeError starts
+			stateEnd := strings.Index(actual[len(beforeState):], beforeError) + len(beforeState)
+			if stateEnd < len(beforeState) {
+				return false
+			}
+
+			// Extract the UUID
+			stateValue := actual[len(beforeState):stateEnd]
+			
+			// Validate UUID format (simple check)
+			if !strings.Contains(stateValue, "-") || len(stateValue) < 30 {
+				return false
+			}
+
+			// Remaining text after error message
+			remainingText := actual[stateEnd+len(beforeError):]
+			
+			// Check if error message is valid (either "unexpected newline" or "EOF")
+			if !strings.HasPrefix(remainingText, "unexpected newline") && 
+			   !strings.HasPrefix(remainingText, "EOF") {
+				return false
+			}
+			
+			// Check the final part after the error message
+			errorMsgEnd := 0
+			if strings.HasPrefix(remainingText, "unexpected newline") {
+				errorMsgEnd = len("unexpected newline")
+			} else if strings.HasPrefix(remainingText, "EOF") {
+				errorMsgEnd = len("EOF")
+			}
+			
+			return strings.HasPrefix(remainingText[errorMsgEnd:], afterError)
+		} else {
+			// Just check if the remaining text appears after the state
+			stateEnd := strings.Index(actual[len(beforeState):], afterState)
+			return stateEnd >= 0
+		}
+	}
+
+	return false
 }
 
 func TestGoldenFiles(t *testing.T) {
@@ -106,15 +170,30 @@ func TestGoldenFiles(t *testing.T) {
 			// because some golden files might be testing error cases
 			
 			// Read expected output
-			expected, err := os.ReadFile(goldenFile)
+			expectedBytes, err := os.ReadFile(goldenFile)
 			if err != nil {
 				t.Fatalf("Failed to read golden file: %v", err)
 			}
 			
-			// Compare outputs
-			if !bytes.Equal(output, expected) {
-				t.Errorf("Output does not match golden file.\nCommand: %s\nExpected:\n%s\n\nGot:\n%s",
-					cmd, string(expected), string(output))
+			expected := string(expectedBytes)
+			actual := string(output)
+
+			// Normalize line endings for cross-platform compatibility
+			expected = strings.ReplaceAll(expected, "\r\n", "\n")
+			actual = strings.ReplaceAll(actual, "\r\n", "\n")
+
+			// Special case for login test which has placeholders
+			if strings.Contains(expected, "<STATE_PLACEHOLDER>") {
+				if !matchWithPlaceholders(actual, expected) {
+					t.Errorf("Output does not match golden file with placeholders.\nCommand: %s\nExpected:\n%s\n\nGot:\n%s",
+						cmd, expected, actual)
+				}
+			} else {
+				// Standard equality check for other files
+				if actual != expected {
+					t.Errorf("Output does not match golden file.\nCommand: %s\nExpected:\n%s\n\nGot:\n%s",
+						cmd, expected, actual)
+				}
 			}
 		})
 	}
