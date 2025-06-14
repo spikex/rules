@@ -37,7 +37,7 @@ func EnsureClientAuth(client *Client, requireAuth bool) (bool, error) {
 	
 	// Start login flow
 	color.Yellow("Authentication required to perform this operation.")
-	authConfig, err := auth.Login(false)
+	authConfig, err := auth.Login()
 	if err != nil {
 		color.Red("Authentication failed: %v", err)
 		return false, err

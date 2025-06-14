@@ -16,7 +16,7 @@ func EnsureAuthenticated(requireAuth bool) (bool, error) {
 
 	color.Yellow("Authentication required.")
 
-	_, err := Login(false)
+	_, err := Login()
 	if err != nil {
 		color.Red("Failed to authenticate: %v", err)
 		return false, err
