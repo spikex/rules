@@ -250,6 +250,16 @@ func TestGoldenFiles(t *testing.T) {
 					t.Errorf("Output does not match golden file with placeholders.\nCommand: %s\nExpected:\n%s\n\nGot:\n%s",
 						cmd, expected, actual)
 				}
+			} else if strings.Contains(expected, "<VERSION_PLACEHOLDER>") {
+				// Match version output with placeholder
+				// Replace the actual version in the output with the placeholder and compare
+				actualNormalized := actual
+				// Look for a line like 'rules version x.y.z' and replace the version with the placeholder
+				actualNormalized = versionPlaceholderNormalize(actualNormalized)
+				if actualNormalized != expected {
+					t.Errorf("Output does not match golden file with version placeholder.\nCommand: %s\nExpected:\n%s\n\nGot:\n%s",
+						cmd, expected, actual)
+				}
 			} else {
 				// Standard equality check for other files
 				if actual != expected {
@@ -259,6 +269,18 @@ func TestGoldenFiles(t *testing.T) {
 			}
 		})
 	}
+}
+
+// versionPlaceholderNormalize replaces the version number in the version output with the placeholder
+func versionPlaceholderNormalize(s string) string {
+	lines := strings.Split(s, "\n")
+	for i, line := range lines {
+		if strings.HasPrefix(line, "rules version ") {
+			// Replace everything after 'rules version '
+			lines[i] = "rules version <VERSION_PLACEHOLDER>"
+		}
+	}
+	return strings.Join(lines, "\n")
 }
 
 // copyFile copies a file from src to dst
