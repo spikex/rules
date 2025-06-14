@@ -58,16 +58,18 @@ To make your rule available to others, you can publish a markdown file using `ru
 
 ```bash
 rules login
-rules publish my-rule.md --slug my-username/my-rule
+rules publish
 ```
 
-This would make your rule available to download with `rules add my-username/my-rule`.
+This would make your rule available to download with `rules add <your-username>/<your-ruleset-name>`.
+
+The command automatically determines the slug from your `rules.json` file and your authenticated user information. Make sure you have a `rules.json` file in your current directory with a `name` field, and an `index.md` file containing your rule content.
 
 <!--
 You can also publish a folder of markdown files:
 
 ```bash
-rules publish ./my-rules --slug my-username/my-rules
+rules publish ./my-rules
 ``` -->
 
 ## Helping users use your rules

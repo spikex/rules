@@ -193,17 +193,21 @@ rules install --force  # Skip confirmation prompts
 Publishes a rule file to the registry.
 
 ```bash
-rules publish my-rule.md --slug my-org/my-rules
-rules publish my-rule.md --slug my-org/my-rules --visibility private
+rules publish                    # Publish from current directory
+rules publish ./my-rules         # Publish from specified directory
+rules publish --visibility private
 ```
 
 - **Args**:
-  - Path to the rule file to publish
+  - Optional path to directory containing rules.json (defaults to current directory)
 - **Flags**:
-  - `--slug`: The organization/ruleset slug to publish to (required)
   - `--visibility`: Set the visibility of the rule to "public" or "private" (default: "public")
 - **Behavior**:
-  - Reads the content of the specified rule file
+  - Reads the slug from rules.json in the current directory or specified path
+  - The slug is constructed as `{organization}/{ruleset-name}` where:
+    - `organization` is determined from the authenticated user's organization slug, username, or email prefix
+    - `ruleset-name` is the "name" field from rules.json
+  - Automatically finds the main rule file to publish (index.md or first .md file found)
   - Uses the registry API's POST endpoint to publish the rule
   - Requires user to be logged in (uses Bearer auth)
   - Sets the visibility of the published rule according to the flag

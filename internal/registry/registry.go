@@ -40,6 +40,14 @@ type PublishRuleRequest struct {
 	Content    string `json:"content"`
 }
 
+// UserInfo represents user information from the registry
+type UserInfo struct {
+	ID       string `json:"id"`
+	Email    string `json:"email"`
+	Username string `json:"username"`
+	OrgSlug  string `json:"orgSlug"`
+}
+
 // NewClient creates a new registry client
 func NewClient(baseURL string) *Client {
 	return &Client{
@@ -311,4 +319,40 @@ func (c *Client) downloadFromGitHub(repoPath string, formatDir string) error {
 	}
 	
 	return nil
+}
+
+// GetUserInfo fetches user information from the registry
+func (c *Client) GetUserInfo() (*UserInfo, error) {
+	if !c.IsLoggedIn {
+		return nil, fmt.Errorf("you must be logged in to get user information")
+	}
+	
+	url := fmt.Sprintf("%s/user", c.BaseURL)
+	
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request: %w", err)
+	}
+	
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.AuthToken))
+	utils.SetUserAgent(req)
+	
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get user info: %w", err)
+	}
+	defer resp.Body.Close()
+	
+	if resp.StatusCode != http.StatusOK {
+		bodyBytes, _ := ioutil.ReadAll(resp.Body)
+		return nil, fmt.Errorf("failed to get user info: status %d, response: %s", resp.StatusCode, string(bodyBytes))
+	}
+	
+	var userInfo UserInfo
+	if err := json.NewDecoder(resp.Body).Decode(&userInfo); err != nil {
+		return nil, fmt.Errorf("failed to decode user info: %w", err)
+	}
+	
+	return &userInfo, nil
 }

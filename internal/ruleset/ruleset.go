@@ -3,6 +3,7 @@ package ruleset
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -128,4 +129,53 @@ func CreateRule(rule Rule, format, name string) error {
 	// Create the rule file
 	fileName := filepath.Join(ruleDir, name+".md")
 	return os.WriteFile(fileName, []byte(content), 0644)
+}
+
+// FindRuleSetFile looks for rules.json in the current directory or specified path
+func FindRuleSetFile(path string) (string, error) {
+	if path != "" {
+		// If path is specified, check if it's a directory or file
+		stat, err := os.Stat(path)
+		if err != nil {
+			return "", fmt.Errorf("path does not exist: %w", err)
+		}
+		
+		if stat.IsDir() {
+			// If it's a directory, look for rules.json inside it
+			rulesPath := filepath.Join(path, "rules.json")
+			if _, err := os.Stat(rulesPath); err == nil {
+				return rulesPath, nil
+			}
+			return "", fmt.Errorf("rules.json not found in directory: %s", path)
+		} else {
+			// If it's a file, check if it's rules.json
+			if filepath.Base(path) == "rules.json" {
+				return path, nil
+			}
+			return "", fmt.Errorf("specified file is not rules.json")
+		}
+	}
+	
+	// Look for rules.json in current directory
+	currentDir, err := os.Getwd()
+	if err != nil {
+		return "", fmt.Errorf("failed to get current directory: %w", err)
+	}
+	
+	rulesPath := filepath.Join(currentDir, "rules.json")
+	if _, err := os.Stat(rulesPath); err == nil {
+		return rulesPath, nil
+	}
+	
+	return "", fmt.Errorf("rules.json not found in current directory")
+}
+
+// LoadRuleSetFromPath loads a ruleset from the current directory or specified path
+func LoadRuleSetFromPath(path string) (*RuleSet, error) {
+	rulesPath, err := FindRuleSetFile(path)
+	if err != nil {
+		return nil, err
+	}
+	
+	return LoadRuleSet(rulesPath)
 }

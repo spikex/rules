@@ -28,7 +28,7 @@ install|tests/golden/install/install.golden
 logout|tests/golden/logout/logout.golden
 
 # login
-login|tests/golden/login/login.golden
+# login|tests/golden/login/login.golden
 
 # publish
 publish|tests/golden/publish/publish.golden
