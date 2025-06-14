@@ -1,7 +1,7 @@
 Starting login process...
 
 Starting authentication with Continue...
-Opening browser to sign in at: https://api.workos.com/user_management/authorize?client_id=client_01J0FW6XN8N2XJAECF7NE0Y65J&provider=authkit&redirect_uri=https%3A%2F%2Fhub.continue.dev%2Ftokens%2Fcallback&response_type=code&state=<STATE_PLACEHOLDER>
+Opening browser to sign in at: https://api.workos.com/user_management/authorize?client_id=client_01J0FW6XN8N2XJAECF7NE0Y65J&provider=authkit&redirect_uri=https%3A%2F%2Fhub.continue.dev%2Ftokens%2Fcallback%3FclientName%3Drules&response_type=code&state=<STATE_PLACEHOLDER>
 
 After signing in, you'll receive a token.
 Paste your sign-in token here: Login failed: <ERROR_PLACEHOLDER>
