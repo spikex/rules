@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/continuedev/rules-cli/compare/v1.0.12...v1.1.0) (2025-06-14)
+
+
+### Features
+
+* use rules.json for slug when publishing ([f5404d7](https://github.com/continuedev/rules-cli/commit/f5404d7c581f29a81140d4a6d01dc029c45ea6d0))
+
 ## [1.0.12](https://github.com/continuedev/rules-cli/compare/v1.0.11...v1.0.12) (2025-06-14)
 
 
