@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"rules-cli/internal/utils"
 	"strings"
 )
 
@@ -68,6 +69,8 @@ func (c *Client) GetRule(name, version string) (*RuleInfo, error) {
 		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.AuthToken))
 	}
 	
+	utils.SetUserAgent(req)
+	
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
@@ -109,6 +112,8 @@ func (c *Client) DownloadRule(name, version, formatDir string) error {
 	if c.IsLoggedIn {
 		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.AuthToken))
 	}
+	
+	utils.SetUserAgent(req)
 	
 	client := &http.Client{}
 	resp, err := client.Do(req)
@@ -167,6 +172,8 @@ func (c *Client) PublishRule(ownerSlug, ruleSlug, content string, visibility str
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.AuthToken))
 	
+	utils.SetUserAgent(req)
+	
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
@@ -193,6 +200,7 @@ func (c *Client) downloadFromGitHub(repoPath string, formatDir string) error {
 		return fmt.Errorf("failed to create request: %w", err)
 	}
 	req.Header.Set("Accept", "application/vnd.github.v3+json")
+	utils.SetUserAgent(req)
 	
 	// Send request
 	client := &http.Client{}
