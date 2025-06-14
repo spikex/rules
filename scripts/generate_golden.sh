@@ -31,7 +31,9 @@ trap cleanup EXIT
 
 # Build the latest version of the CLI
 echo -e "${GREEN}Building the CLI...${NC}"
-go build -o ./rules-cli
+# Get version from package.json
+VERSION=$(node -p "require('./package.json').version")
+go build -ldflags="-X main.Version=${VERSION} -X rules-cli/internal/utils.Version=${VERSION}" -o ./rules-cli
 
 # Copy the CLI to the temporary directory
 cp ./rules-cli "$TEMP_DIR/"

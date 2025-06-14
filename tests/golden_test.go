@@ -2,6 +2,7 @@ package tests
 
 import (
 	"bufio"
+	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -141,7 +142,15 @@ func TestGoldenFiles(t *testing.T) {
 	cliPath := "../rules-cli"
 	if _, err := os.Stat(cliPath); os.IsNotExist(err) {
 		// Build the CLI if it doesn't exist
-		cmd := exec.Command("go", "build", "-o", cliPath, "../main.go")
+		// Get version from package.json
+		versionCmd := exec.Command("node", "-p", "require('../package.json').version")
+		versionBytes, err := versionCmd.Output()
+		if err != nil {
+			t.Fatalf("Failed to get version from package.json: %v", err)
+		}
+		version := strings.TrimSpace(string(versionBytes))
+		
+		cmd := exec.Command("go", "build", "-ldflags", fmt.Sprintf("-X main.Version=%s -X rules-cli/internal/utils.Version=%s", version, version), "-o", cliPath, "../main.go")
 		if err := cmd.Run(); err != nil {
 			t.Fatalf("Failed to build CLI: %v", err)
 		}
