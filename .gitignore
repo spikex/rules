@@ -6,7 +6,7 @@ rules-cli
 test-rule.yaml
 e.sh
 
-.github
+.github/instructions
 .sourcegraph
 .continue
 .clinerules
