@@ -1,6 +1,6 @@
 {
   "name": "rules-cli",
-  "version": "1.0.11",
+  "version": "1.0.12",
   "description": "Rules CLI tool",
   "files": [
     "bin.js",

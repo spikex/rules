@@ -1,3 +1,11 @@
+## [1.0.12](https://github.com/continuedev/rules-cli/compare/v1.0.11...v1.0.12) (2025-06-14)
+
+
+### Bug Fixes
+
+* add color ([0b98eb2](https://github.com/continuedev/rules-cli/commit/0b98eb217dc664b087c08851552995c9f3b12b77))
+* remove unecessary logging ([ed3d75d](https://github.com/continuedev/rules-cli/commit/ed3d75d82791dbc7bebdbc62ec9b3f25ecf2d304))
+
 ## [1.0.11](https://github.com/continuedev/rules-cli/compare/v1.0.10...v1.0.11) (2025-06-13)
 
 
