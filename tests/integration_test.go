@@ -1,10 +1,10 @@
-package main
+package tests
 
 import (
-	"testing"
 	"os/exec"
-	"strings"
 	"path/filepath"
+	"strings"
+	"testing"
 )
 
 func TestCLIIntegration(t *testing.T) {
