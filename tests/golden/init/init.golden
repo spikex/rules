@@ -1,0 +1,4 @@
+Initializing rules with format: default
+Found existing rules folder(s): continue, windsurf
+Consider running 'rules render continue' to initialize rules.json from existing rules
+Rules initialized successfully. Format: default

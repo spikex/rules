@@ -1,0 +1,29 @@
+A command-line tool to create, manage, and convert rule sets 
+for code guidance across different AI assistant platforms 
+(Continue, Cursor, Windsurf, Copilot, etc.).
+
+Usage:
+  rules [flags]
+  rules [command]
+
+Available Commands:
+  add         Add a rule from the registry
+  completion  Generate the autocompletion script for the specified shell
+  create      Create a new rule
+  help        Help about any command
+  init        Initialize a new rules directory
+  install     Synchronize rules directory with rules.json
+  login       Authenticate with the registry service
+  logout      Log out from the registry service
+  publish     Publish a rule file to the registry
+  remove      Remove a rule from the ruleset
+  render      Render rules to a specific format
+  whoami      Display information about the currently authenticated user
+
+Flags:
+      --config string   config file (default is $HOME/.rules-cli/rules-cli.yaml)
+      --format string   rule format (default is set in config)
+  -h, --help            help for rules
+  -v, --version         Display version information
+
+Use "rules [command] --help" for more information about a command.

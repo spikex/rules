@@ -1,0 +1,2 @@
+This will remove all existing rules in '.rules' and reinstall them from rules.json.
+Continue? (y/N): Installation cancelled.

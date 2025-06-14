@@ -1,0 +1,40 @@
+# Format: <command args>|<golden file path>
+# Lines starting with # are comments
+
+# Basic commands
+-v|tests/golden/v/version.golden
+--help|tests/golden/h/help.golden
+
+# init
+init|tests/golden/init/init.golden
+
+# add
+add starter/nextjs-rules|tests/golden/add/add.golden
+
+# remove
+remove starter/nextjs-rules|tests/golden/remove/remove.golden
+remove dne/dne|tests/golden/remove/dne.golden
+
+# completion
+completion|tests/golden/completion/completion.golden
+
+# create
+# create|tests/golden/create/create.golden
+
+# install
+install|tests/golden/install/install.golden
+
+# logout
+logout|tests/golden/logout/logout.golden
+
+# login
+login|tests/golden/login/login.golden
+
+# publish
+publish|tests/golden/publish/publish.golden
+
+# render
+render|tests/golden/render/render.golden
+
+# whoami
+whoami|tests/golden/whoami/whoami.golden
