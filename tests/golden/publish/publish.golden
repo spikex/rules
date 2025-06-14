@@ -1,0 +1,14 @@
+Error: accepts 1 arg(s), received 0
+Usage:
+  rules publish <rule-file> [flags]
+
+Flags:
+  -h, --help                help for publish
+      --slug string         The organization/ruleset slug to publish to (required)
+      --visibility string   Set the visibility of the rule to 'public' or 'private' (default "public")
+
+Global Flags:
+      --config string   config file (default is $HOME/.rules-cli/rules-cli.yaml)
+      --format string   rule format (default is set in config)
+
+accepts 1 arg(s), received 0

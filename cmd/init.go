@@ -7,6 +7,7 @@ import (
 
 	"rules-cli/internal/formats"
 
+	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 )
 
@@ -18,7 +19,7 @@ var initCmd = &cobra.Command{
 This creates the necessary directory structure and an empty rules.json file.`,
 	Example: `  rules init`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		fmt.Printf("Initializing rules with format: %s\n", format)
+		color.Cyan("Initializing rules with format: %s", format)
 		
 		// Check if rules.json doesn't exist
 		rulesJSONPath, err := formats.GetRulesJSONPath(format)
@@ -31,8 +32,8 @@ This creates the necessary directory structure and an empty rules.json file.`,
 			formatFolders, err := formats.FindRulesFormats()
 			if err == nil && len(formatFolders) > 0 {
 				// Suggest rendering to the user
-				fmt.Printf("Found existing rules folder(s): %s\n", strings.Join(formatFolders, ", "))
-				fmt.Printf("Consider running 'rules render %s' to initialize rules.json from existing rules\n", formatFolders[0])
+				color.Yellow("Found existing rules folder(s): %s", strings.Join(formatFolders, ", "))
+				color.Yellow("Consider running 'rules render %s' to initialize rules.json from existing rules", formatFolders[0])
 			}
 		}
 		
@@ -40,7 +41,7 @@ This creates the necessary directory structure and an empty rules.json file.`,
 			return fmt.Errorf("initialization failed: %w", err)
 		}
 		
-		fmt.Printf("Rules initialized successfully. Format: %s\n", format)
+		color.Green("Rules initialized successfully. Format: %s", format)
 		return nil
 	},
 }

@@ -3,9 +3,10 @@ package cmd
 import (
 	"fmt"
 
+	"rules-cli/internal/auth"
+
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
-	"rules-cli/internal/auth"
 )
 
 // loginCmd represents the login command
@@ -17,7 +18,7 @@ var loginCmd = &cobra.Command{
 		fmt.Println("Starting login process...")
 		
 		// Call the login function from the auth package
-		authConfig, err := auth.Login(false)
+		authConfig, err := auth.Login()
 		if err != nil {
 			color.Red("Login failed: %v", err)
 			return

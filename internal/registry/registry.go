@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"rules-cli/internal/utils"
 	"strings"
 )
 
@@ -68,6 +69,8 @@ func (c *Client) GetRule(name, version string) (*RuleInfo, error) {
 		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.AuthToken))
 	}
 	
+	utils.SetUserAgent(req)
+	
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
@@ -110,6 +113,8 @@ func (c *Client) DownloadRule(name, version, formatDir string) error {
 		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.AuthToken))
 	}
 	
+	utils.SetUserAgent(req)
+	
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
@@ -137,10 +142,6 @@ func (c *Client) DownloadRule(name, version, formatDir string) error {
 	if err := ioutil.WriteFile(rulePath, []byte(registryResponse.Content), 0644); err != nil {
 		return fmt.Errorf("failed to write rule file: %w", err)
 	}
-	
-	// Print summary of downloaded rule
-	fmt.Printf("Successfully downloaded rule '%s' (version: %s)\n", name, version)
-	fmt.Printf("Rule saved to: %s\n", rulePath)
 	
 	return nil
 }
@@ -171,6 +172,8 @@ func (c *Client) PublishRule(ownerSlug, ruleSlug, content string, visibility str
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.AuthToken))
 	
+	utils.SetUserAgent(req)
+	
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
@@ -197,6 +200,7 @@ func (c *Client) downloadFromGitHub(repoPath string, formatDir string) error {
 		return fmt.Errorf("failed to create request: %w", err)
 	}
 	req.Header.Set("Accept", "application/vnd.github.v3+json")
+	utils.SetUserAgent(req)
 	
 	// Send request
 	client := &http.Client{}
@@ -304,13 +308,6 @@ func (c *Client) downloadFromGitHub(repoPath string, formatDir string) error {
 			fileList.WriteString("  - " + file.Name + "\n")
 		}
 		return fmt.Errorf("no rules found in the src/ directory of the GitHub repository.\n%s", fileList.String())
-	}
-	
-	// Print summary of downloaded files
-	fmt.Printf("Successfully downloaded rules from GitHub repository: %s\n", repoPath)
-	fmt.Printf("Downloaded %d files to: %s\n", len(downloadedFiles), ruleDir)
-	for _, file := range downloadedFiles {
-		fmt.Printf("  - %s\n", file)
 	}
 	
 	return nil

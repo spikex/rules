@@ -119,16 +119,13 @@ func Prompt(question string) (string, error) {
 }
 
 // GetAuthUrlForTokenPage returns the auth URL for the token page
-func GetAuthUrlForTokenPage(useOnboarding bool) string {
+func GetAuthUrlForTokenPage() string {
 	baseURL := "https://api.workos.com/user_management/authorize"
 	params := url.Values{}
 	params.Add("response_type", "code")
 	params.Add("client_id", viper.GetString("workos_client_id"))
 	
-	redirectPath := "tokens/callback"
-	if useOnboarding {
-		redirectPath = "tokens/onboarding-callback"
-	}
+	redirectPath := "tokens/callback?clientName=rules"
 	params.Add("redirect_uri", fmt.Sprintf("%s%s", viper.GetString("app_url"), redirectPath))
 	
 	params.Add("state", uuid.New().String())
@@ -198,7 +195,7 @@ func RefreshToken(refreshToken string) (AuthConfig, error) {
 }
 
 // Login authenticates using the Continue web flow
-func Login(useOnboarding bool) (AuthConfig, error) {
+func Login() (AuthConfig, error) {
 	// If CONTINUE_API_KEY environment variable exists, use that instead
 	if apiKey := os.Getenv("CONTINUE_API_KEY"); apiKey != "" {
 		color.Green("Using CONTINUE_API_KEY from environment variables")
@@ -210,7 +207,7 @@ func Login(useOnboarding bool) (AuthConfig, error) {
 	color.Cyan("\nStarting authentication with Continue...")
 
 	// Get auth URL
-	authURL := GetAuthUrlForTokenPage(useOnboarding)
+	authURL := GetAuthUrlForTokenPage()
 	color.Green("Opening browser to sign in at: %s", authURL)
 	if err := browser.OpenURL(authURL); err != nil {
 		fmt.Printf("Failed to open browser: %v\n", err)

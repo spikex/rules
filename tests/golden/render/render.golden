@@ -1,0 +1,17 @@
+Error: format is required
+Usage:
+  rules render [format] [flags]
+
+Examples:
+  rules render cursor
+  rules render continue
+
+Flags:
+  -h, --help      help for render
+  -v, --verbose   Enable verbose output
+
+Global Flags:
+      --config string   config file (default is $HOME/.rules-cli/rules-cli.yaml)
+      --format string   rule format (default is set in config)
+
+format is required

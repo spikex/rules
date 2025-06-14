@@ -10,6 +10,7 @@ import (
 	"rules-cli/internal/registry"
 	"rules-cli/internal/ruleset"
 
+	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 )
 
@@ -62,7 +63,7 @@ This ensures the rules directory matches exactly what's defined in rules.json.`,
 			
 			// Create a default ruleset
 			rs = ruleset.DefaultRuleSet(filepath.Base(filepath.Dir(rulesJSONPath)))
-			fmt.Println("Creating new rules.json file with default structure")
+			color.Cyan("Creating new rules.json file with default structure")
 			
 			// Save the new ruleset
 			if err := rs.SaveRuleSet(rulesJSONPath); err != nil {
@@ -82,20 +83,20 @@ This ensures the rules directory matches exactly what's defined in rules.json.`,
 		if _, err := os.Stat(rulesDir); err == nil {
 			// Directory exists, check if we should clean it
 			if !forceInstall {
-				fmt.Printf("This will remove all existing rules in '%s' and reinstall them from rules.json.\n", rulesDir)
+				color.Yellow("This will remove all existing rules in '%s' and reinstall them from rules.json.", rulesDir)
 				fmt.Print("Continue? (y/N): ")
 				
 				var response string
 				fmt.Scanln(&response)
 				
 				if strings.ToLower(response) != "y" {
-					fmt.Println("Installation cancelled.")
+					color.Yellow("Installation cancelled.")
 					return nil
 				}
 			}
 			
 			// Remove all files and directories in the rules directory
-			fmt.Printf("Removing existing rules from '%s'...\n", rulesDir)
+			color.Cyan("Removing existing rules from '%s'...", rulesDir)
 			if err := removeContents(rulesDir); err != nil {
 				return fmt.Errorf("failed to clean rules directory: %w", err)
 			}
@@ -112,9 +113,9 @@ This ensures the rules directory matches exactly what's defined in rules.json.`,
 		client := registry.NewClient(cfg.RegistryURL)
 
 		// Install each rule from rules.json
-		fmt.Println("Installing rules from rules.json...")
+		color.Cyan("Installing rules from rules.json...")
 		if len(rs.Rules) == 0 {
-			fmt.Println("No rules found in rules.json.")
+			color.Yellow("No rules found in rules.json.")
 			
 			// Print format suggestion at the very end if applicable
 			if formatSuggestion != "" {
@@ -128,10 +129,10 @@ This ensures the rules directory matches exactly what's defined in rules.json.`,
 		errorCount := 0
 
 		for ruleName, ruleVersion := range rs.Rules {
-			fmt.Printf("Installing rule '%s' (version: %s)...\n", ruleName, ruleVersion)
+			color.Cyan("Installing rule '%s' (version: %s)...", ruleName, ruleVersion)
 			
 			if err := client.DownloadRule(ruleName, ruleVersion, rulesDir); err != nil {
-				fmt.Printf("Error installing rule '%s': %v\n", ruleName, err)
+				color.Red("Error installing rule '%s': %v", ruleName, err)
 				errorCount++
 			} else {
 				successCount++
@@ -139,7 +140,7 @@ This ensures the rules directory matches exactly what's defined in rules.json.`,
 		}
 
 		// Print summary
-		fmt.Printf("\nInstallation complete: %d rules installed, %d failed\n", successCount, errorCount)
+		color.Green("\nInstallation complete: %d rules installed, %d failed", successCount, errorCount)
 		
 		// Print format suggestion at the very end if applicable
 		if formatSuggestion != "" {

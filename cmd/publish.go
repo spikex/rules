@@ -10,6 +10,7 @@ import (
 	"rules-cli/internal/auth"
 	"rules-cli/internal/registry"
 
+	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 )
 
@@ -86,14 +87,14 @@ func runPublishCommand(cmd *cobra.Command, args []string) error {
 	client.SetAuthToken(authConfig.AccessToken)
 
 	// Publish the rule
-	fmt.Printf("Publishing rule to %s/%s with visibility: %s\n", ownerSlug, ruleSlug, visibility)
+	color.Cyan("Publishing rule to %s/%s with visibility: %s", ownerSlug, ruleSlug, visibility)
 	err = client.PublishRule(ownerSlug, ruleSlug, string(content), visibility)
 	if err != nil {
 		return fmt.Errorf("failed to publish rule: %w", err)
 	}
 
 	ruleFileName := filepath.Base(ruleFilePath)
-	fmt.Printf("Successfully published rule '%s' to %s/%s\n", ruleFileName, ownerSlug, ruleSlug)
+	color.Green("Successfully published rule '%s' to %s/%s", ruleFileName, ownerSlug, ruleSlug)
 	return nil
 }
 

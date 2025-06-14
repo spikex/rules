@@ -6,9 +6,11 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/spf13/cobra"
 	"rules-cli/internal/formats"
 	"rules-cli/internal/ruleset"
+
+	"github.com/fatih/color"
+	"github.com/spf13/cobra"
 )
 
 var (
@@ -66,22 +68,22 @@ For GitHub repositories, use the same gh: prefix as when adding.`,
 			
 			// Check if we should prompt for confirmation
 			if !forceFlag {
-				fmt.Printf("This will remove rule '%s' (version %s) and delete its files. Continue? [y/N]: ", ruleName, version)
+				color.Yellow("This will remove rule '%s' (version %s) and delete its files. Continue? [y/N]: ", ruleName, version)
 				var response string
 				fmt.Scanln(&response)
 				
 				if !strings.EqualFold(response, "y") && !strings.EqualFold(response, "yes") {
-					fmt.Println("Operation cancelled")
+					color.Yellow("Operation cancelled")
 					return nil
 				}
 			}
 
 			// Delete rule directory and files
 			if err := os.RemoveAll(ruleDir); err != nil {
-				fmt.Printf("Warning: Failed to delete rule files: %v\n", err)
+				color.Red("Warning: Failed to delete rule files: %v", err)
 				// Continue anyway to remove from rules.json
 			} else {
-				fmt.Printf("Deleted rule files from %s\n", ruleDir)
+				color.Cyan("Deleted rule files from %s", ruleDir)
 			}
 		}
 
@@ -91,7 +93,7 @@ For GitHub repositories, use the same gh: prefix as when adding.`,
 			return fmt.Errorf("failed to save ruleset: %w", err)
 		}
 
-		fmt.Printf("Rule '%s' (version %s) removed successfully\n", ruleName, version)
+		color.Green("Rule '%s' (version %s) removed successfully", ruleName, version)
 		return nil
 	},
 }
