@@ -125,7 +125,7 @@ func GetAuthUrlForTokenPage() string {
 	params.Add("response_type", "code")
 	params.Add("client_id", viper.GetString("workos_client_id"))
 	
-	redirectPath := "tokens/callback?clientName=rules"
+	redirectPath := "tokens/callback/rules"
 	params.Add("redirect_uri", fmt.Sprintf("%s%s", viper.GetString("app_url"), redirectPath))
 	
 	params.Add("state", uuid.New().String())
