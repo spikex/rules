@@ -165,6 +165,59 @@ func TestGoldenFiles(t *testing.T) {
 				return
 			}
 			
+			// Create a temporary directory for this test
+			tempDir, err := os.MkdirTemp("", "rules-cli-test-*")
+			if err != nil {
+				t.Fatalf("Failed to create temporary directory: %v", err)
+			}
+			defer os.RemoveAll(tempDir)
+			
+			// Copy the CLI binary to the temporary directory
+			tempCliPath := filepath.Join(tempDir, "rules-cli")
+			if err := copyFile(cliPath, tempCliPath); err != nil {
+				t.Fatalf("Failed to copy CLI binary: %v", err)
+			}
+			
+			// Change to the temporary directory
+			originalDir, err := os.Getwd()
+			if err != nil {
+				t.Fatalf("Failed to get current directory: %v", err)
+			}
+			defer os.Chdir(originalDir)
+			
+			if err := os.Chdir(tempDir); err != nil {
+				t.Fatalf("Failed to change to temporary directory: %v", err)
+			}
+			
+			// Run prerequisite commands based on the current command
+			if strings.HasPrefix(cmd, "add ") {
+				// For add commands, run init first to create rules.json
+				initCmd := exec.Command(tempCliPath, "init")
+				if err := initCmd.Run(); err != nil {
+					t.Logf("Init command failed (this might be expected): %v", err)
+				}
+			} else if cmd == "install" {
+				// For install command, run init and add to set up rules.json with rules
+				initCmd := exec.Command(tempCliPath, "init")
+				if err := initCmd.Run(); err != nil {
+					t.Logf("Init command failed (this might be expected): %v", err)
+				}
+				addCmd := exec.Command(tempCliPath, "add", "starter/nextjs-rules")
+				if err := addCmd.Run(); err != nil {
+					t.Logf("Add command failed (this might be expected): %v", err)
+				}
+			} else if strings.HasPrefix(cmd, "remove ") {
+				// For remove commands, run init and add to set up rules.json with rules
+				initCmd := exec.Command(tempCliPath, "init")
+				if err := initCmd.Run(); err != nil {
+					t.Logf("Init command failed (this might be expected): %v", err)
+				}
+				addCmd := exec.Command(tempCliPath, "add", "starter/nextjs-rules")
+				if err := addCmd.Run(); err != nil {
+					t.Logf("Add command failed (this might be expected): %v", err)
+				}
+			}
+			
 			// Split the command into arguments
 			var args []string
 			if cmd != "" {
@@ -172,14 +225,14 @@ func TestGoldenFiles(t *testing.T) {
 			}
 			
 			// Run the command
-			execCmd := exec.Command(cliPath, args...)
+			execCmd := exec.Command(tempCliPath, args...)
 			output, err := execCmd.CombinedOutput()
 			
 			// We don't fail the test if the command returns non-zero
 			// because some golden files might be testing error cases
 			
 			// Read expected output
-			expectedBytes, err := os.ReadFile(goldenFile)
+			expectedBytes, err := os.ReadFile(filepath.Join(originalDir, goldenFile))
 			if err != nil {
 				t.Fatalf("Failed to read golden file: %v", err)
 			}
@@ -197,6 +250,16 @@ func TestGoldenFiles(t *testing.T) {
 					t.Errorf("Output does not match golden file with placeholders.\nCommand: %s\nExpected:\n%s\n\nGot:\n%s",
 						cmd, expected, actual)
 				}
+			} else if strings.Contains(expected, "<VERSION_PLACEHOLDER>") {
+				// Match version output with placeholder
+				// Replace the actual version in the output with the placeholder and compare
+				actualNormalized := actual
+				// Look for a line like 'rules version x.y.z' and replace the version with the placeholder
+				actualNormalized = versionPlaceholderNormalize(actualNormalized)
+				if actualNormalized != expected {
+					t.Errorf("Output does not match golden file with version placeholder.\nCommand: %s\nExpected:\n%s\n\nGot:\n%s",
+						cmd, expected, actual)
+				}
 			} else {
 				// Standard equality check for other files
 				if actual != expected {
@@ -206,6 +269,41 @@ func TestGoldenFiles(t *testing.T) {
 			}
 		})
 	}
+}
+
+// versionPlaceholderNormalize replaces the version number in the version output with the placeholder
+func versionPlaceholderNormalize(s string) string {
+	lines := strings.Split(s, "\n")
+	for i, line := range lines {
+		if strings.HasPrefix(line, "rules version ") {
+			// Replace everything after 'rules version '
+			lines[i] = "rules version <VERSION_PLACEHOLDER>"
+		}
+	}
+	return strings.Join(lines, "\n")
+}
+
+// copyFile copies a file from src to dst
+func copyFile(src, dst string) error {
+	sourceFile, err := os.Open(src)
+	if err != nil {
+		return err
+	}
+	defer sourceFile.Close()
+
+	destFile, err := os.Create(dst)
+	if err != nil {
+		return err
+	}
+	defer destFile.Close()
+
+	_, err = destFile.ReadFrom(sourceFile)
+	if err != nil {
+		return err
+	}
+	
+	// Make the copied file executable
+	return os.Chmod(dst, 0755)
 }
 
 // TestHelp provides a simple example to ensure our testing framework works
