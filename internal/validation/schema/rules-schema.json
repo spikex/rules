@@ -1,0 +1,50 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/continuedev/rules-cli/schema/rules-schema.json",
+  "title": "Rules Configuration Schema",
+  "description": "Schema for rules.json configuration files used by the rules CLI",
+  "type": "object",
+  "required": ["name", "version", "rules"],
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "The name of the ruleset",
+      "minLength": 1,
+      "maxLength": 100,
+      "pattern": "^[a-zA-Z0-9]([a-zA-Z0-9-_]*[a-zA-Z0-9])?$"
+    },
+    "description": {
+      "type": "string",
+      "description": "A brief description of the ruleset",
+      "maxLength": 500
+    },
+    "author": {
+      "type": "string",
+      "description": "The author of the ruleset",
+      "maxLength": 100
+    },
+    "license": {
+      "type": "string",
+      "description": "The license for the ruleset",
+      "maxLength": 50
+    },
+    "version": {
+      "type": "string",
+      "description": "The version of the ruleset",
+      "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$"
+    },
+    "rules": {
+      "type": "object",
+      "description": "A map of rule names to their versions",
+      "patternProperties": {
+        "^(gh:[a-zA-Z0-9-._]+/[a-zA-Z0-9-._]+|[a-zA-Z0-9-._]+(/[a-zA-Z0-9-._]+)*)$": {
+          "type": "string",
+          "description": "The version of the rule",
+          "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

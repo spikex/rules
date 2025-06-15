@@ -10,6 +10,7 @@ import (
 	"rules-cli/internal/auth"
 	"rules-cli/internal/registry"
 	"rules-cli/internal/ruleset"
+	"rules-cli/internal/validation"
 
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
@@ -40,12 +41,6 @@ Examples:
 
 // runPublishCommand implements the main logic for the publish command
 func runPublishCommand(cmd *cobra.Command, args []string) error {
-	// Ensure the user is authenticated
-	authenticated, err := auth.EnsureAuthenticated(true)
-	if err != nil || !authenticated {
-		return fmt.Errorf("authentication required to publish rules")
-	}
-
 	// Validate the visibility
 	if visibility != "public" && visibility != "private" {
 		return fmt.Errorf("visibility must be either 'public' or 'private'")
@@ -57,6 +52,28 @@ func runPublishCommand(cmd *cobra.Command, args []string) error {
 		rulesPath = args[0]
 	}
 
+	// Determine the rules.json file path
+	var rulesJSONPath string
+	if rulesPath != "" {
+		// If a path was specified, look for rules.json in that directory
+		stat, err := os.Stat(rulesPath)
+		if err == nil && stat.IsDir() {
+			rulesJSONPath = filepath.Join(rulesPath, "rules.json")
+		} else {
+			rulesJSONPath = rulesPath
+		}
+	} else {
+		// Look in current directory for rules.json
+		rulesJSONPath = "rules.json"
+	}
+
+	// Validate the rules.json file against the schema FIRST
+	color.Cyan("Validating rules.json against schema...")
+	if err := validation.ValidateRulesJSONFromFile(rulesJSONPath); err != nil {
+		return fmt.Errorf("schema validation failed: %w", err)
+	}
+	color.Green("✓ rules.json is valid")
+
 	// Load ruleset from the specified path or current directory
 	rs, err := ruleset.LoadRuleSetFromPath(rulesPath)
 	if err != nil {
@@ -66,6 +83,12 @@ func runPublishCommand(cmd *cobra.Command, args []string) error {
 	// Validate that the ruleset has a name
 	if rs.Name == "" {
 		return fmt.Errorf("rules.json must have a 'name' field")
+	}
+
+	// NOW ensure the user is authenticated (after validation passes)
+	authenticated, err := auth.EnsureAuthenticated(true)
+	if err != nil || !authenticated {
+		return fmt.Errorf("authentication required to publish rules")
 	}
 
 	// Create registry client and get user info
@@ -155,17 +178,17 @@ func isValidSlug(slug string) bool {
 	if slug == "" {
 		return false
 	}
-	
+
 	// Check if slug contains only valid characters
 	for _, char := range slug {
-		if !((char >= 'a' && char <= 'z') || 
-			 (char >= 'A' && char <= 'Z') || 
-			 (char >= '0' && char <= '9') || 
-			 char == '-' || char == '_') {
+		if !((char >= 'a' && char <= 'z') ||
+			(char >= 'A' && char <= 'Z') ||
+			(char >= '0' && char <= '9') ||
+			char == '-' || char == '_') {
 			return false
 		}
 	}
-	
+
 	return true
 }
 
