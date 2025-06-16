@@ -1,3 +1,10 @@
+## [1.1.1](https://github.com/continuedev/rules-cli/compare/v1.1.0...v1.1.1) (2025-06-16)
+
+
+### Bug Fixes
+
+* validate rule frontmatter ([6a65090](https://github.com/continuedev/rules-cli/commit/6a65090d6132ac5a324964a3c45a029f44e190e8))
+
 # [1.1.0](https://github.com/continuedev/rules-cli/compare/v1.0.12...v1.1.0) (2025-06-14)
 
 
