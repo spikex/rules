@@ -6,7 +6,7 @@ title: rules
 
 :::tip
 
-**tl;dr:** `brew install rules` then `rules add starter/nextjs-rules`
+**tl;dr:** `npm i -g rules-cli` then `rules add starter/nextjs-rules`
 
 :::
 
@@ -14,16 +14,10 @@ title: rules
 
 ## Install `rules`
 
-:::info
-
-`rules` is currently only available privately through the `continuedev` tap (you must be logged in with GitHub such that you can `git clone` private continuedev repos). Soon it will be available publicly with `brew install rules`, and on other operating systems.
-
-:::
-
-To install `rules` on Mac, you can run the following command. If you don't have `brew` installed yet, you can find the command to do so [here](https://brew.sh/).
+The `rules` CLI can be installed using NPM:
 
 ```bash
-brew install continuedev/tap/rules
+npm i -g rules-cli
 ```
 
 ## Add rules
