@@ -12,6 +12,17 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+// EmptyYAMLValue represents an empty YAML value that renders as just a space after the colon
+type EmptyYAMLValue struct{}
+
+func (e EmptyYAMLValue) MarshalYAML() (interface{}, error) {
+	var node yaml.Node
+	node.Kind = yaml.ScalarNode
+	node.Value = ""
+	node.Tag = ""
+	return &node, nil
+}
+
 // RuleMetadata represents the frontmatter metadata of a rule file
 type RuleMetadata map[string]interface{}
 
@@ -79,8 +90,11 @@ func TransformRuleContent(content []byte, format Format) ([]byte, error) {
 		return trimmedBodyContent, nil
 	}
 	
+	// Clean up empty/nil values before serialization
+	cleanedMetadata := cleanMetadataForYAML(transformedMetadata)
+
 	// Serialize metadata to YAML
-	metadataBytes, err := yaml.Marshal(transformedMetadata)
+	metadataBytes, err := yaml.Marshal(cleanedMetadata)
 	if err != nil {
 		return nil, fmt.Errorf("failed to serialize metadata: %w", err)
 	}
@@ -93,6 +107,34 @@ func TransformRuleContent(content []byte, format Format) ([]byte, error) {
 	result.Write(trimmedBodyContent)
 	
 	return result.Bytes(), nil
+}
+
+// cleanMetadataForYAML converts nil/empty values to EmptyYAMLValue for clean YAML output
+func cleanMetadataForYAML(metadata RuleMetadata) RuleMetadata {
+	cleaned := RuleMetadata{}
+
+	for key, value := range metadata {
+		switch v := value.(type) {
+		case nil:
+			cleaned[key] = EmptyYAMLValue{}
+		case string:
+			if v == "" {
+				cleaned[key] = EmptyYAMLValue{}
+			} else {
+				cleaned[key] = v
+			}
+		case *string:
+			if v == nil || *v == "" {
+				cleaned[key] = EmptyYAMLValue{}
+			} else {
+				cleaned[key] = *v
+			}
+		default:
+			cleaned[key] = v
+		}
+	}
+		
+	return cleaned
 }
 
 // TransformMetadata transforms rule metadata based on the target format
