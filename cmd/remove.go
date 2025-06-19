@@ -73,9 +73,7 @@ For GitHub repositories, use the same gh: prefix as when adding.`,
 				
 				// Check if parent directory exists and is empty
 				if entries, err := os.ReadDir(parentDir); err == nil && len(entries) == 0 {
-					if err := os.Remove(parentDir); err == nil {
-						color.Cyan("Removed empty parent directory: %s", parentDir)
-					}
+					os.Remove(parentDir)
 				}
 			}
 		}

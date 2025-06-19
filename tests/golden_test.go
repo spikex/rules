@@ -253,12 +253,12 @@ func TestGoldenFiles(t *testing.T) {
 			} else if strings.Contains(expected, "<VERSION_PLACEHOLDER>") {
 				// Match version output with placeholder
 				// Replace the actual version in the output with the placeholder and compare
-				actualNormalized := actual
-				// Look for a line like 'rules version x.y.z' and replace the version with the placeholder
-				actualNormalized = versionPlaceholderNormalize(actualNormalized)
-				if actualNormalized != expected {
-					t.Errorf("Output does not match golden file with version placeholder.\nCommand: %s\nExpected:\n%s\n\nGot:\n%s",
-						cmd, expected, actual)
+				actualNormalized := versionPlaceholderNormalize(actual)
+				expectedNormalized := expected
+
+				if actualNormalized != expectedNormalized {
+					t.Errorf("Output does not match golden file with version placeholder.\nCommand: %s\nExpected:\n%s\n\nGot (normalized):\n%s\n\nOriginal Output:\n%s",
+						cmd, expectedNormalized, actualNormalized, actual)
 				}
 			} else {
 				// Standard equality check for other files
@@ -278,6 +278,18 @@ func versionPlaceholderNormalize(s string) string {
 		if strings.HasPrefix(line, "rules version ") {
 			// Replace everything after 'rules version '
 			lines[i] = "rules version <VERSION_PLACEHOLDER>"
+		}
+
+		// Check for version in add command output
+		if strings.Contains(line, "(version ") && !strings.Contains(line, "<VERSION_PLACEHOLDER>") {
+			// Replace the version between "(version " and ")"
+			parts := strings.SplitN(line, "(version ", 2)
+			if len(parts) == 2 {
+				versionPart := strings.SplitN(parts[1], ")", 2)
+				if len(versionPart) == 2 {
+					lines[i] = parts[0] + "(version <VERSION_PLACEHOLDER>)" + versionPart[1]
+				}
+			}
 		}
 	}
 	return strings.Join(lines, "\n")
