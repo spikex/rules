@@ -13,24 +13,18 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var (
-	deleteFlag bool
-	forceFlag  bool
-)
-
 // removeCmd represents the remove command
 var removeCmd = &cobra.Command{
 	Use:   "remove <rulename>",
 	Short: "Remove a rule from the ruleset",
 	Long: `Remove a rule from the ruleset.
-By default, this only removes the rule from rules.json.
-Use --delete to also remove rule files from disk.
+This will remove the rule from rules.json and delete its files from the .rules folder.
 
 For GitHub repositories, use the same gh: prefix as when adding.`,
 	Example: `  rules remove vercel/nextjs
-  rules remove redis --delete
-  rules remove workos/authkit-nextjs --delete --force
-  rules remove gh:owner/repo --delete`,
+  rules remove redis
+  rules remove workos/authkit-nextjs
+  rules remove gh:owner/repo`,
 	Args: cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ruleName := args[0]
@@ -61,29 +55,28 @@ For GitHub repositories, use the same gh: prefix as when adding.`,
 		// Get rule version before removal
 		version, _ := rs.GetRuleVersion(ruleName)
 
-		// Handle deletion of rule files
-		if deleteFlag {
-			// Calculate rule directory path
-			ruleDir := filepath.Join(rulesDir, ruleName)
+		// Calculate rule directory path
+		ruleDir := filepath.Join(rulesDir, ruleName)
+		
+		// Delete rule directory and files
+		if err := os.RemoveAll(ruleDir); err != nil {
+			color.Red("Warning: Failed to delete rule files: %v", err)
+			// Continue anyway to remove from rules.json
+		} else {
+			color.Cyan("Deleted rule files from %s", ruleDir)
 			
-			// Check if we should prompt for confirmation
-			if !forceFlag {
-				color.Yellow("This will remove rule '%s' (version %s) and delete its files. Continue? [y/N]: ", ruleName, version)
-				var response string
-				fmt.Scanln(&response)
+			// Check if parent directory is empty and delete it if so
+			if strings.Contains(ruleName, "/") {
+				// Get the parent directory name (e.g., "starter" from "starter/nextjs-rules")
+				parentName := ruleName[:strings.LastIndex(ruleName, "/")]
+				parentDir := filepath.Join(rulesDir, parentName)
 				
-				if !strings.EqualFold(response, "y") && !strings.EqualFold(response, "yes") {
-					color.Yellow("Operation cancelled")
-					return nil
+				// Check if parent directory exists and is empty
+				if entries, err := os.ReadDir(parentDir); err == nil && len(entries) == 0 {
+					if err := os.Remove(parentDir); err == nil {
+						color.Cyan("Removed empty parent directory: %s", parentDir)
+					}
 				}
-			}
-
-			// Delete rule directory and files
-			if err := os.RemoveAll(ruleDir); err != nil {
-				color.Red("Warning: Failed to delete rule files: %v", err)
-				// Continue anyway to remove from rules.json
-			} else {
-				color.Cyan("Deleted rule files from %s", ruleDir)
 			}
 		}
 
@@ -100,8 +93,4 @@ For GitHub repositories, use the same gh: prefix as when adding.`,
 
 func init() {
 	rootCmd.AddCommand(removeCmd)
-	
-	// Add flags specific to remove command
-	removeCmd.Flags().BoolVar(&deleteFlag, "delete", false, "Also delete rule files from disk")
-	removeCmd.Flags().BoolVar(&forceFlag, "force", false, "Skip confirmation prompts")
 }

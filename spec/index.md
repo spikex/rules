@@ -147,13 +147,9 @@ rules remove gh:owner/repo
 
 - **Args**:
   - Name of ruleset to remove (including GitHub-sourced rules)
-- **Flags**:
-  - `--delete`: Also delete rule files from disk
-  - `--force`: Skip confirmation prompts
 - **Behavior**:
   - Removes rule reference from rules.json
-  - Optionally deletes rule files from disk
-  - Confirms before destructive operations
+  - Deletes rule files from `.rules` folder
 
 ### `rules render`
 
