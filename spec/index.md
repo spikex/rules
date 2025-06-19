@@ -172,16 +172,12 @@ Synchronizes the `.rules` directory with the contents of `rules.json`.
 
 ```bash
 rules install
-rules install --force  # Skip confirmation prompts
 ```
 
-- **Flags**:
-  - `--force`: Skip confirmation prompts
 - **Behavior**:
   - Performs a clean installation by:
     - Removing all existing rule files and directories first
     - Re-downloading and installing all rules specified in `rules.json`
-  - Provides confirmation prompt before deleting existing rules
   - Ensures the `.rules` directory exactly matches what's defined in `rules.json`
   - Reports on installation progress and any errors encountered
 

@@ -15,10 +15,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var (
-	forceInstall bool
-)
-
 // installCmd represents the install command
 var installCmd = &cobra.Command{
 	Use:   "install",
@@ -29,8 +25,7 @@ Performs a clean installation by:
 - Re-downloading and installing all rules specified in rules.json
 
 This ensures the rules directory matches exactly what's defined in rules.json.`,
-	Example: `  rules install
-  rules install --force`,
+	Example: `  rules install`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		// Get rules directory for the format
 		rulesDir, err := formats.GetRulesDirectory(format)
@@ -82,21 +77,7 @@ This ensures the rules directory matches exactly what's defined in rules.json.`,
 
 		// Check if rules directory exists
 		if _, err := os.Stat(rulesDir); err == nil {
-			// Directory exists, check if we should clean it
-			if !forceInstall {
-				color.Yellow("This will remove all existing rules in '%s' and reinstall them from rules.json.", rulesDir)
-				fmt.Print("Continue? (y/N): ")
-				
-				var response string
-				fmt.Scanln(&response)
-				
-				if strings.ToLower(response) != "y" {
-					color.Yellow("Installation cancelled.")
-					return nil
-				}
-			}
-			
-			// Remove all files and directories in the rules directory
+			// Directory exists, clean it without confirmation
 			color.Cyan("Removing existing rules from '%s'...", rulesDir)
 			if err := removeContents(rulesDir); err != nil {
 				return fmt.Errorf("failed to clean rules directory: %w", err)
@@ -191,7 +172,4 @@ func removeContents(dir string) error {
 
 func init() {
 	rootCmd.AddCommand(installCmd)
-	
-	// Add flags
-	installCmd.Flags().BoolVar(&forceInstall, "force", false, "Skip confirmation prompts")
 }
