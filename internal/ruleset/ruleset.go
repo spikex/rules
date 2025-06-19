@@ -34,7 +34,7 @@ func DefaultRuleSet(name string) *RuleSet {
 		Name:        name,
 		Description: "A ruleset for AI code assistants",
 		Author:      "Anonymous",
-		License:     "Apache-2.0",
+		License:     "CC0-1.0",
 		Version:     "1.0.0",
 		Rules:       make(map[string]string),
 	}

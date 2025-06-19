@@ -125,7 +125,7 @@ func InitializeFormat(formatName string) error {
   "name": "new-rules",
   "description": "",
   "author": "",
-  "license": "Apache-2.0",
+  "license": "CC0-1.0",
   "version": "1.0.0",
   "rules": {}
 }`
