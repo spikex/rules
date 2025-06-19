@@ -14,7 +14,7 @@ func EnsureAuthenticated(requireAuth bool) (bool, error) {
 		return false, nil
 	}
 
-	color.Yellow("Authentication required.")
+	color.Yellow("Authentication required")
 
 	_, err := Login()
 	if err != nil {
