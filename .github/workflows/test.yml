@@ -31,6 +31,7 @@ jobs:
           fi
 
       # Run this first to fail fast if tests fail
+      #
       - name: Run Go tests
         run: go test ./... -v
 
