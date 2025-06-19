@@ -1,3 +1,10 @@
+## [1.1.4](https://github.com/continuedev/rules-cli/compare/v1.1.3...v1.1.4) (2025-06-19)
+
+
+### Bug Fixes
+
+* list supported formats ([3d87889](https://github.com/continuedev/rules-cli/commit/3d87889f9c1a76f6206891bb07d7b811e831ccc8))
+
 ## [1.1.3](https://github.com/continuedev/rules-cli/compare/v1.1.2...v1.1.3) (2025-06-19)
 
 
