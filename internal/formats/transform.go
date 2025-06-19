@@ -79,24 +79,18 @@ func TransformRuleContent(content []byte, format Format) ([]byte, error) {
 
 	var trimmedBodyContent = bytes.TrimSpace(bodyContent)
 	
-	// Transform metadata based on format
-	transformedMetadata, err := TransformMetadata(metadata, format)
-	if err != nil {
-		return nil, err
-	}
+	// Handle Cursor format fallback - if no frontmatter exists, use fallback format
+	if format.Name == "cursor" && len(metadata) == 0 {
+		fallbackMetadata := RuleMetadata{
+			"description": EmptyYAMLValue{},
+			"globs":       EmptyYAMLValue{},
+			"alwaysApply": true,
+		}
 	
-	// If no metadata (or empty), just return the trimmed body content
-	if len(transformedMetadata) == 0 {
-		return trimmedBodyContent, nil
-	}
-	
-	// Clean up empty/nil values before serialization
-	cleanedMetadata := cleanMetadataForYAML(transformedMetadata)
-
 	// Serialize metadata to YAML
-	metadataBytes, err := yaml.Marshal(cleanedMetadata)
+		metadataBytes, err := yaml.Marshal(fallbackMetadata)
 	if err != nil {
-		return nil, fmt.Errorf("failed to serialize metadata: %w", err)
+			return nil, fmt.Errorf("failed to serialize fallback metadata: %w", err)
 	}
 	
 	// Combine frontmatter and content
@@ -109,6 +103,36 @@ func TransformRuleContent(content []byte, format Format) ([]byte, error) {
 	return result.Bytes(), nil
 }
 
+	// Transform metadata based on format
+	transformedMetadata, err := TransformMetadata(metadata, format)
+		if err != nil {
+		return nil, err
+		}
+		
+	// If no metadata (or empty), just return the trimmed body content
+	if len(transformedMetadata) == 0 {
+		return trimmedBodyContent, nil
+		}
+		
+	// Clean up empty/nil values before serialization
+	cleanedMetadata := cleanMetadataForYAML(transformedMetadata)
+
+	// Serialize metadata to YAML
+	metadataBytes, err := yaml.Marshal(cleanedMetadata)
+	if err != nil {
+		return nil, fmt.Errorf("failed to serialize metadata: %w", err)
+		}
+		
+	// Combine frontmatter and content
+	var result bytes.Buffer
+	result.WriteString("---\n")
+	result.Write(metadataBytes)
+	result.WriteString("---\n\n")
+	result.Write(trimmedBodyContent)
+
+	return result.Bytes(), nil
+		}
+		
 // cleanMetadataForYAML converts nil/empty values to EmptyYAMLValue for clean YAML output
 func cleanMetadataForYAML(metadata RuleMetadata) RuleMetadata {
 	cleaned := RuleMetadata{}
@@ -133,10 +157,10 @@ func cleanMetadataForYAML(metadata RuleMetadata) RuleMetadata {
 			cleaned[key] = v
 		}
 	}
-		
+	
 	return cleaned
 }
-
+		
 // TransformMetadata transforms rule metadata based on the target format
 func TransformMetadata(metadata RuleMetadata, format Format) (RuleMetadata, error) {
 	// Create a copy of the metadata
@@ -234,8 +258,8 @@ func ProcessRuleFiles(sourceDir string, targetFormat Format) error {
 	targetDir := targetFormat.DirectoryPrefix
 	if err := os.MkdirAll(targetDir, 0755); err != nil {
 		return fmt.Errorf("failed to create target directory %s: %w", targetDir, err)
-	}
-	
+		}
+		
 	// Walk through all files in the source directory
 	return filepath.Walk(sourceDir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
@@ -244,9 +268,9 @@ func ProcessRuleFiles(sourceDir string, targetFormat Format) error {
 		
 		// Skip directories
 		if info.IsDir() {
-			return nil
-		}
-		
+		return nil
+}
+
 		// Only process Markdown files
 		if !strings.HasSuffix(path, ".md") {
 			return nil
@@ -256,8 +280,8 @@ func ProcessRuleFiles(sourceDir string, targetFormat Format) error {
 		content, err := os.ReadFile(path)
 		if err != nil {
 			return fmt.Errorf("failed to read source file %s: %w", path, err)
-		}
-		
+	}
+	
 		applicable, err := IsRuleApplicable(content, targetFormat)
 		if err != nil {
 			return err

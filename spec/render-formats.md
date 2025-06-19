@@ -32,7 +32,17 @@ Most formats require just placing the markdown files in a new folder, maintainin
 - **ID**: "cursor"
 - **Folder**: `.cursor/rules`
 - **File Extension**: `.mdc`
-- **Format**: Same format as Continue
+- **Format**: Same format as Continue, except if there is nothing in the frontmatter, we should fallback to the following:
+
+```md
+---
+description:
+globs:
+alwaysApply: true
+---
+
+# Markdown content
+```
 
 ### Windsurf
 

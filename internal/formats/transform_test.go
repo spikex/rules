@@ -95,6 +95,28 @@ Test content.`,
 			format:   GetFormat("copilot"),
 			expected: "description:",
 		},
+		{
+			name: "Cursor format with no frontmatter - should use fallback",
+			content: `# Test Rule
+
+Test content.`,
+			format:   GetFormat("cursor"),
+			expected: "alwaysApply: true",
+		},
+		{
+			name: "Cursor format with existing frontmatter - should transform normally",
+			content: `---
+description: "Test rule"
+alwaysApply: false
+globs: "**/*.go"
+---
+
+# Test Rule
+
+Test content.`,
+			format:   GetFormat("cursor"),
+			expected: "alwaysApply: false",
+		},
 	}
 
 	for _, tt := range tests {
@@ -104,18 +126,18 @@ Test content.`,
 				t.Fatalf("TransformRuleContent failed: %v", err)
 			}
 
-			resultStr := string(result)
-			
+	resultStr := string(result)
+	
 			// Should not contain "null" values
 			if strings.Contains(resultStr, ": null") {
 				t.Errorf("Result should not contain null values. Got:\n%s", resultStr)
-			}
-			
+	}
+	
 			// Should not contain quoted empty strings
 			if strings.Contains(resultStr, `: ""`) || strings.Contains(resultStr, `: ''`) {
 				t.Errorf("Result should not contain quoted empty strings. Got:\n%s", resultStr)
-			}
-			
+	}
+	
 			// Should contain expected content
 			if !strings.Contains(resultStr, tt.expected) {
 				t.Errorf("Result should contain '%s'. Got:\n%s", tt.expected, resultStr)
@@ -259,5 +281,92 @@ Test content.`
 	}
 	if !strings.Contains(resultStr, "globs:") {
 		t.Error("Empty globs should be formatted as 'globs:'")
+	}
+}
+
+func TestTransformRuleContent_CursorFallback(t *testing.T) {
+	tests := []struct {
+		name           string
+		content        string
+		expectedFields []string
+	}{
+		{
+			name: "No frontmatter should use fallback",
+			content: `# Test Rule
+
+This is a test rule without frontmatter.`,
+			expectedFields: []string{
+				"description:",
+				"globs:",
+				"alwaysApply: true",
+				"# Test Rule",
+				"This is a test rule without frontmatter.",
+			},
+		},
+		{
+			name: "Empty frontmatter should use fallback",
+			content: `---
+---
+
+# Test Rule
+
+This is a test rule with empty frontmatter.`,
+			expectedFields: []string{
+				"description:",
+				"globs:",
+				"alwaysApply: true",
+				"# Test Rule",
+				"This is a test rule with empty frontmatter.",
+			},
+		},
+		{
+			name: "Existing frontmatter should not use fallback",
+			content: `---
+description: "Existing rule"
+globs: "**/*.js"
+alwaysApply: false
+---
+
+# Test Rule
+
+This is a test rule with existing frontmatter.`,
+			expectedFields: []string{
+				"description: Existing rule",
+				"globs: '**/*.js'",
+				"alwaysApply: false",
+				"# Test Rule",
+				"This is a test rule with existing frontmatter.",
+			},
+		},
+	}
+
+	format := GetFormat("cursor")
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result, err := TransformRuleContent([]byte(tt.content), format)
+			if err != nil {
+				t.Fatalf("TransformRuleContent failed: %v", err)
+			}
+
+			resultStr := string(result)
+
+			// Check that all expected fields are present
+			for _, field := range tt.expectedFields {
+				if !strings.Contains(resultStr, field) {
+					t.Errorf("Expected field '%s' not found in result:\n%s", field, resultStr)
+				}
+			}
+
+			// Verify YAML structure is correct for fallback cases
+			if strings.Contains(tt.name, "fallback") {
+				if !strings.Contains(resultStr, "---\n") {
+					t.Error("Result should start with YAML frontmatter delimiter")
+				}
+				if !strings.Contains(resultStr, "\n---\n") {
+					t.Error("Result should end YAML frontmatter with delimiter")
+				}
+			}
+		})
 	}
 }
