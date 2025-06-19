@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"mime/multipart"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -29,15 +30,9 @@ type RuleInfo struct {
 	Files       []string `json:"files"`
 }
 
-// RegistryResponse represents the response from the registry API
-type RegistryResponse struct {
-	Content string `json:"content"`
-}
-
-// PublishRuleRequest represents the request to publish a new rule version
-type PublishRuleRequest struct {
+// PublishMetadata represents the metadata for publishing a rule
+type PublishMetadata struct {
 	Visibility string `json:"visibility"`
-	Content    string `json:"content"`
 }
 
 // UserInfo represents user information from the registry
@@ -63,52 +58,17 @@ func (c *Client) SetAuthToken(token string) {
 	c.IsLoggedIn = token != ""
 }
 
-// GetRule fetches a rule from the registry
-func (c *Client) GetRule(name, version string) (*RuleInfo, error) {
-	url := fmt.Sprintf("%s/rules/%s/%s", c.BaseURL, name, version)
-	
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create request: %w", err)
-	}
-	
-	// Add auth header if logged in
-	if c.IsLoggedIn {
-		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.AuthToken))
-	}
-	
-	utils.SetUserAgent(req)
-	
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		return nil, fmt.Errorf("failed to request rule: %w", err)
-	}
-	defer resp.Body.Close()
-	
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("failed to fetch rule: status %d", resp.StatusCode)
-	}
-	
-	var ruleInfo RuleInfo
-	if err := json.NewDecoder(resp.Body).Decode(&ruleInfo); err != nil {
-		return nil, fmt.Errorf("failed to decode rule info: %w", err)
-	}
-	
-	return &ruleInfo, nil
-}
-
 // DownloadRule downloads a rule to the specified directory
-func (c *Client) DownloadRule(name, version, formatDir string) error {
+func (c *Client) DownloadRule(ownerSlug, ruleSlug, version, formatDir string) error {
 	// Check if this is a GitHub repository
-	if strings.HasPrefix(name, "gh:") {
-		return c.downloadFromGitHub(name[3:], formatDir)
+	if strings.HasPrefix(ownerSlug, "gh:") {
+		return c.downloadFromGitHub(ownerSlug[3:]+"/"+ruleSlug, formatDir)
 	}
 	
-	// Use the registry API GET endpoint to fetch rule content
-	url := fmt.Sprintf("%s/registry/v1/%s/latest", c.BaseURL, name)
+	// Use the registry API download endpoint
+	url := fmt.Sprintf("%s/v0/%s/%s/latest/download", c.BaseURL, ownerSlug, ruleSlug)
 	if version != "latest" && version != "" {
-		url = fmt.Sprintf("%s/registry/v1/%s/%s", c.BaseURL, name, version)
+		url = fmt.Sprintf("%s/v0/%s/%s/%s/download", c.BaseURL, ownerSlug, ruleSlug, version)
 	}
 	
 	req, err := http.NewRequest("GET", url, nil)
@@ -134,50 +94,118 @@ func (c *Client) DownloadRule(name, version, formatDir string) error {
 		return fmt.Errorf("failed to fetch rule from registry API: status %d", resp.StatusCode)
 	}
 	
-	var registryResponse RegistryResponse
-	if err := json.NewDecoder(resp.Body).Decode(&registryResponse); err != nil {
-		return fmt.Errorf("failed to decode registry API response: %w", err)
+	// Read the zip file
+	zipData, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return fmt.Errorf("failed to read zip data: %w", err)
+	}
+	
+	// Create a reader for the zip file
+	zipReader, err := zip.NewReader(bytes.NewReader(zipData), int64(len(zipData)))
+	if err != nil {
+		return fmt.Errorf("failed to parse zip archive: %w", err)
 	}
 	
 	// Create rule directory
-	ruleDir := filepath.Join(formatDir, name)
+	ruleDir := filepath.Join(formatDir, ownerSlug, ruleSlug)
 	if err := os.MkdirAll(ruleDir, 0755); err != nil {
 		return fmt.Errorf("failed to create rule directory: %w", err)
 	}
 	
-	// Write the main rule file
-	rulePath := filepath.Join(ruleDir, "index.md")
-	if err := ioutil.WriteFile(rulePath, []byte(registryResponse.Content), 0644); err != nil {
-		return fmt.Errorf("failed to write rule file: %w", err)
+	// Extract files from the zip
+	for _, file := range zipReader.File {
+		// Skip directories
+		if file.FileInfo().IsDir() {
+			continue
+		}
+		
+		// Open the file
+		src, err := file.Open()
+		if err != nil {
+			return fmt.Errorf("failed to open file from archive: %w", err)
+		}
+		
+		// Get destination path
+		destPath := filepath.Join(ruleDir, file.Name)
+		
+		// Create directory for file if needed
+		destDir := filepath.Dir(destPath)
+		if err := os.MkdirAll(destDir, 0755); err != nil {
+			src.Close()
+			return fmt.Errorf("failed to create directory: %w", err)
+		}
+		
+		// Create the file
+		dest, err := os.Create(destPath)
+		if err != nil {
+			src.Close()
+			return fmt.Errorf("failed to create file: %w", err)
+		}
+		
+		// Copy the content
+		_, err = io.Copy(dest, src)
+		src.Close()
+		dest.Close()
+		
+		if err != nil {
+			return fmt.Errorf("failed to write file: %w", err)
+		}
 	}
 	
 	return nil
 }
 
 // PublishRule publishes a new version of a rule to the registry
-func (c *Client) PublishRule(ownerSlug, ruleSlug, content string, visibility string) error {
+func (c *Client) PublishRule(ruleSlug, version, zipFilePath string, visibility string) error {
 	if !c.IsLoggedIn {
 		return fmt.Errorf("you must be logged in to publish a rule")
 	}
 	
-	url := fmt.Sprintf("%s/packages/%s/%s/versions/new", c.BaseURL, ownerSlug, ruleSlug)
+	url := fmt.Sprintf("%s/v0/%s/%s", c.BaseURL, ruleSlug, version)
 	
-	publishRequest := PublishRuleRequest{
-		Visibility: visibility,
-		Content:    content,
-	}
-	
-	reqBody, err := json.Marshal(publishRequest)
+	// Read the zip file
+	zipData, err := ioutil.ReadFile(zipFilePath)
 	if err != nil {
-		return fmt.Errorf("failed to marshal publish request: %w", err)
+		return fmt.Errorf("failed to read zip file: %w", err)
 	}
 	
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer(reqBody))
+	// Create multipart form data
+	var buf bytes.Buffer
+	writer := multipart.NewWriter(&buf)
+	
+	// Add the zip file
+	fileWriter, err := writer.CreateFormFile("file", filepath.Base(zipFilePath))
+	if err != nil {
+		return fmt.Errorf("failed to create form file: %w", err)
+	}
+	
+	if _, err := fileWriter.Write(zipData); err != nil {
+		return fmt.Errorf("failed to write zip data to form: %w", err)
+	}
+	
+	// Add metadata
+	metadata := PublishMetadata{
+		Visibility: visibility,
+	}
+	
+	metadataJSON, err := json.Marshal(metadata)
+	if err != nil {
+		return fmt.Errorf("failed to marshal metadata: %w", err)
+	}
+	
+	if err := writer.WriteField("metadata", string(metadataJSON)); err != nil {
+		return fmt.Errorf("failed to write metadata field: %w", err)
+	}
+	
+	writer.Close()
+	
+	// Create request
+	req, err := http.NewRequest("POST", url, &buf)
 	if err != nil {
 		return fmt.Errorf("failed to create publish request: %w", err)
 	}
 	
-	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Content-Type", writer.FormDataContentType())
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.AuthToken))
 	
 	utils.SetUserAgent(req)
@@ -319,40 +347,4 @@ func (c *Client) downloadFromGitHub(repoPath string, formatDir string) error {
 	}
 	
 	return nil
-}
-
-// GetUserInfo fetches user information from the registry
-func (c *Client) GetUserInfo() (*UserInfo, error) {
-	if !c.IsLoggedIn {
-		return nil, fmt.Errorf("you must be logged in to get user information")
-	}
-	
-	url := fmt.Sprintf("%s/user", c.BaseURL)
-	
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create request: %w", err)
-	}
-	
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.AuthToken))
-	utils.SetUserAgent(req)
-	
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get user info: %w", err)
-	}
-	defer resp.Body.Close()
-	
-	if resp.StatusCode != http.StatusOK {
-		bodyBytes, _ := ioutil.ReadAll(resp.Body)
-		return nil, fmt.Errorf("failed to get user info: status %d, response: %s", resp.StatusCode, string(bodyBytes))
-	}
-	
-	var userInfo UserInfo
-	if err := json.NewDecoder(resp.Body).Decode(&userInfo); err != nil {
-		return nil, fmt.Errorf("failed to decode user info: %w", err)
-	}
-	
-	return &userInfo, nil
 }

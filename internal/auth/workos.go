@@ -126,7 +126,7 @@ func GetAuthUrlForTokenPage() string {
 	params.Add("client_id", viper.GetString("workos_client_id"))
 	
 	redirectPath := "tokens/callback/rules"
-	params.Add("redirect_uri", fmt.Sprintf("%s%s", viper.GetString("app_url"), redirectPath))
+	params.Add("redirect_uri", fmt.Sprintf("%s/%s", viper.GetString("app_url"), redirectPath))
 	
 	params.Add("state", uuid.New().String())
 	params.Add("provider", "authkit")
@@ -159,7 +159,7 @@ func RefreshToken(refreshToken string) (AuthConfig, error) {
 	}
 
 	resp, err := http.Post(
-		fmt.Sprintf("%sauth/refresh", apiBase),
+		fmt.Sprintf("%s/auth/refresh", apiBase),
 		"application/json",
 		bytes.NewBuffer(reqBody),
 	)

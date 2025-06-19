@@ -3,6 +3,7 @@ notes.md
 rules-cli
 .rules
 /rules
+test-rules/
 test-rule.yaml
 e.sh
 

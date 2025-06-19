@@ -1,11 +1,14 @@
 package cmd
 
 import (
+	"archive/zip"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"rules-cli/internal/auth"
 	"rules-cli/internal/registry"
@@ -17,26 +20,106 @@ import (
 )
 
 var (
-	visibility string
+	visibility     string
+	packageVersion string
 )
 
 // publishCmd represents the publish command
 var publishCmd = &cobra.Command{
 	Use:   "publish [path]",
-	Short: "Publish a rule file to the registry",
-	Long: `Publishes a rule file to the registry.
+	Short: "Publish a rule package to the registry",
+	Long: `Publishes a rule package to the registry as a zip file.
 
 This command requires authentication and will prompt you to login if you're not already.
 The slug is automatically determined from rules.json in the current directory or specified path.
 
 The visibility can be set to "public" (default) or "private".
+The version can be specified with --version flag, defaults to timestamp-based version.
 
 Examples:
-  rules publish                    # Publish from current directory
-  rules publish ./my-rules         # Publish from specified directory
-  rules publish --visibility private`,
+  rules publish                           # Publish from current directory
+  rules publish ./my-rules                # Publish from specified directory
+  rules publish --visibility private      # Publish as private
+  rules publish --version 1.0.0          # Publish with specific version`,
 	Args: cobra.MaximumNArgs(1),
 	RunE: runPublishCommand,
+}
+
+// createPackageZip creates a zip file containing all the rule files
+func createPackageZip(rulesPath string, tempDir string) (string, error) {
+	// Create temporary zip file
+	zipFileName := fmt.Sprintf("package-%d.zip", time.Now().Unix())
+	zipPath := filepath.Join(tempDir, zipFileName)
+	
+	zipFile, err := os.Create(zipPath)
+	if err != nil {
+		return "", fmt.Errorf("failed to create zip file: %w", err)
+	}
+	defer zipFile.Close()
+	
+	zipWriter := zip.NewWriter(zipFile)
+	defer zipWriter.Close()
+	
+	// Determine the source directory
+	sourceDir := "."
+	if rulesPath != "" {
+		if stat, err := os.Stat(rulesPath); err == nil && stat.IsDir() {
+			sourceDir = rulesPath
+		} else {
+			sourceDir = filepath.Dir(rulesPath)
+		}
+	}
+	
+	// Walk through the directory and add files to zip
+	err = filepath.Walk(sourceDir, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		
+		// Skip directories
+		if info.IsDir() {
+			return nil
+		}
+		
+		// Skip hidden files and directories
+		if strings.HasPrefix(info.Name(), ".") {
+			return nil
+		}
+		
+		// Skip temporary files
+		if strings.HasSuffix(info.Name(), ".tmp") || strings.HasSuffix(info.Name(), "~") {
+			return nil
+		}
+		
+		// Get relative path from source directory
+		relPath, err := filepath.Rel(sourceDir, path)
+		if err != nil {
+			return err
+		}
+		
+		// Create file in zip
+		zipFileWriter, err := zipWriter.Create(relPath)
+		if err != nil {
+			return err
+		}
+		
+		// Open source file
+		sourceFile, err := os.Open(path)
+		if err != nil {
+			return err
+		}
+		defer sourceFile.Close()
+		
+		// Copy file content to zip
+		_, err = io.Copy(zipFileWriter, sourceFile)
+		return err
+	})
+	
+	if err != nil {
+		return "", fmt.Errorf("failed to create package zip: %w", err)
+	}
+	
+	return zipPath, nil
 }
 
 // runPublishCommand implements the main logic for the publish command
@@ -96,80 +179,32 @@ func runPublishCommand(cmd *cobra.Command, args []string) error {
 	client := registry.NewClient(cfg.RegistryURL)
 	client.SetAuthToken(authConfig.AccessToken)
 
-	// Get user information to determine the organization slug
-	userInfo, err := client.GetUserInfo()
+	// Generate version if not specified
+	packageVersion = rs.Version;
+
+	// Create temporary directory for package creation
+	tempDir, err := ioutil.TempDir("", "rules-publish-")
 	if err != nil {
-		return fmt.Errorf("failed to get user information: %w", err)
+		return fmt.Errorf("failed to create temporary directory: %w", err)
 	}
+	defer os.RemoveAll(tempDir)
 
-	// Determine the organization slug
-	ownerSlug := userInfo.OrgSlug
-	if ownerSlug == "" {
-		// Fallback to username if orgSlug is not available
-		ownerSlug = userInfo.Username
-		if ownerSlug == "" {
-			// Fallback to email prefix if username is not available
-			if userInfo.Email != "" {
-				ownerSlug = strings.Split(userInfo.Email, "@")[0]
-			} else {
-				return fmt.Errorf("could not determine organization slug from user information")
-			}
-		}
-	}
-
-	// Use the ruleset name as the rule slug
-	ruleSlug := rs.Name
-
-	// Validate the slug format
-	if !isValidSlug(ownerSlug) || !isValidSlug(ruleSlug) {
-		return fmt.Errorf("invalid slug format: %s/%s", ownerSlug, ruleSlug)
-	}
-
-	// Find the main rule file to publish
-	// Look for index.md in the rules directory
-	var ruleFilePath string
-	if rulesPath != "" {
-		// If a path was specified, look for index.md in that directory
-		stat, err := os.Stat(rulesPath)
-		if err == nil && stat.IsDir() {
-			ruleFilePath = filepath.Join(rulesPath, "index.md")
-		}
-	} else {
-		// Look in current directory for index.md
-		ruleFilePath = "index.md"
-	}
-
-	// If index.md doesn't exist, look for any .md file in the rules directory
-	if _, err := os.Stat(ruleFilePath); os.IsNotExist(err) {
-		// Look for any .md file in the current directory
-		files, err := filepath.Glob("*.md")
-		if err == nil && len(files) > 0 {
-			ruleFilePath = files[0]
-		} else {
-			return fmt.Errorf("no rule file found to publish. Please create an index.md file or specify a rule file")
-		}
-	}
-
-	// Check if the file exists
-	if _, err := os.Stat(ruleFilePath); os.IsNotExist(err) {
-		return fmt.Errorf("rule file '%s' does not exist", ruleFilePath)
-	}
-
-	// Read the file content
-	content, err := ioutil.ReadFile(ruleFilePath)
+	// Create package zip file
+	color.Cyan("Creating package zip file...")
+	zipPath, err := createPackageZip(rulesPath, tempDir)
 	if err != nil {
-		return fmt.Errorf("failed to read rule file: %w", err)
+		return fmt.Errorf("failed to create package: %w", err)
 	}
+	defer os.Remove(zipPath)
 
-	// Publish the rule
-	color.Cyan("Publishing rule to %s/%s with visibility: %s", ownerSlug, ruleSlug, visibility)
-	err = client.PublishRule(ownerSlug, ruleSlug, string(content), visibility)
+	// Publish the rule package
+	color.Cyan("Publishing package to %s (version %s) with visibility: %s", rs.Name, packageVersion, visibility)
+	err = client.PublishRule(rs.Name, packageVersion, zipPath, visibility)
 	if err != nil {
 		return fmt.Errorf("failed to publish rule: %w", err)
 	}
 
-	ruleFileName := filepath.Base(ruleFilePath)
-	color.Green("Successfully published rule '%s' to %s/%s", ruleFileName, ownerSlug, ruleSlug)
+	color.Green("Successfully published package '%s/%s' (version %s)", rs.Name, packageVersion)
 	return nil
 }
 
@@ -197,4 +232,5 @@ func init() {
 
 	// Add flags
 	publishCmd.Flags().StringVar(&visibility, "visibility", "public", "Set the visibility of the rule to 'public' or 'private'")
+	publishCmd.Flags().StringVar(&packageVersion, "version", "", "Version for the package (defaults to timestamp-based version)")
 }

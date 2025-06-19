@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"rules-cli/internal/auth"
 	"rules-cli/internal/formats"
 	"rules-cli/internal/registry"
 	"rules-cli/internal/ruleset"
@@ -22,7 +23,7 @@ var addCmd = &cobra.Command{
 The rule will be downloaded and added to the rules.json file.
 
 Rules are downloaded from the registry API using the GET endpoint 
-(e.g., api.continue.dev/registry/v1/<owner-slug>/<rule-slug>/latest).
+(e.g., api.continue.dev/v0/<owner-slug>/<rule-slug>/latest/download).
 
 For GitHub repositories, use the gh: prefix followed by the owner/repo.
 For example: gh:owner/repo
@@ -37,20 +38,69 @@ When importing from GitHub repositories, the tool will:
 	RunE: runAddCommand,
 }
 
-// parseRuleNameAndVersion extracts the rule name and version from the input argument
-func parseRuleNameAndVersion(ruleArg string) (name string, version string) {
-	version = "0.0.1" // Default version
-	name = ruleArg
-	
-	// Check if version is specified (but not for GitHub URLs)
-	if !strings.HasPrefix(name, "gh:") {
-		if parts := strings.Split(name, "@"); len(parts) > 1 {
-			name = parts[0]
-			version = parts[1]
-		}
+// RuleIdentifier contains the parsed components of a rule identifier
+type RuleIdentifier struct {
+	OwnerSlug string
+	RuleSlug  string
+	Version   string
+	FullName  string // The full name as it should appear in rules.json
+}
+
+// parseRuleIdentifier extracts the owner, rule slug, and version from the input argument
+func parseRuleIdentifier(ruleArg string) (*RuleIdentifier, error) {
+	identifier := &RuleIdentifier{
+		Version: "latest", // Default version
 	}
 	
-	return name, version
+	// Handle GitHub repositories
+	if strings.HasPrefix(ruleArg, "gh:") {
+		// Format: gh:owner/repo or gh:owner/repo@version
+		repoPath := ruleArg[3:] // Remove "gh:" prefix
+		
+		// Check for version
+		if parts := strings.Split(repoPath, "@"); len(parts) > 1 {
+			repoPath = parts[0]
+			identifier.Version = parts[1]
+		}
+		
+		// Split owner/repo
+		repoParts := strings.Split(repoPath, "/")
+		if len(repoParts) != 2 {
+			return nil, fmt.Errorf("GitHub repository must be in format 'gh:owner/repo'")
+		}
+		
+		identifier.OwnerSlug = "gh:" + repoParts[0]
+		identifier.RuleSlug = repoParts[1]
+		identifier.FullName = ruleArg
+		
+		return identifier, nil
+	}
+	
+	// Handle registry rules
+	ruleName := ruleArg
+	
+	// Check if version is specified
+	if parts := strings.Split(ruleName, "@"); len(parts) > 1 {
+		ruleName = parts[0]
+		identifier.Version = parts[1]
+	}
+	
+	// Check if owner/rule format
+	if parts := strings.Split(ruleName, "/"); len(parts) == 2 {
+		identifier.OwnerSlug = parts[0]
+		identifier.RuleSlug = parts[1]
+		identifier.FullName = ruleName
+	} else if len(parts) == 1 {
+		// Single name - might need a default owner or handle differently
+		// For now, we'll assume the rule name is the owner and rule slug
+		identifier.OwnerSlug = parts[0]
+		identifier.RuleSlug = parts[0]
+		identifier.FullName = ruleName
+	} else {
+		return nil, fmt.Errorf("rule name must be in format 'owner/rule' or 'rulename'")
+	}
+	
+	return identifier, nil
 }
 
 // setupRulesDirectory ensures the rules directory exists and returns paths
@@ -108,20 +158,23 @@ func loadOrCreateRuleSet(rulesJSONPath string) (*ruleset.RuleSet, error) {
 }
 
 // downloadRule downloads a rule from the registry
-func downloadRule(client *registry.Client, ruleName, ruleVersion, rulesDir string) error {
-	if strings.HasPrefix(ruleName, "gh:") {
-		color.Cyan("Downloading rules from GitHub repository '%s' (src/ directory)...", ruleName[3:])
+func downloadRule(client *registry.Client, identifier *RuleIdentifier, rulesDir string) error {
+	if strings.HasPrefix(identifier.FullName, "gh:") {
+		color.Cyan("Downloading rules from GitHub repository '%s' (src/ directory)...", identifier.FullName[3:])
 	} else {
-		color.Cyan("Downloading rule '%s' (version %s) from registry API...", ruleName, ruleVersion)
+		color.Cyan("Downloading rule '%s/%s' (version %s) from registry API...", identifier.OwnerSlug, identifier.RuleSlug, identifier.Version)
 	}
 	
-	return client.DownloadRule(ruleName, ruleVersion, rulesDir)
+	return client.DownloadRule(identifier.OwnerSlug, identifier.RuleSlug, identifier.Version, rulesDir)
 }
 
 // runAddCommand implements the main logic for the add command
 func runAddCommand(cmd *cobra.Command, args []string) error {
-	// Parse rule name and version
-	ruleName, ruleVersion := parseRuleNameAndVersion(args[0])
+	// Parse rule identifier
+	identifier, err := parseRuleIdentifier(args[0])
+	if err != nil {
+		return fmt.Errorf("invalid rule identifier: %w", err)
+	}
 	
 	// Setup rules directory
 	rulesDir, rulesJSONPath, err := setupRulesDirectory(format)
@@ -138,27 +191,29 @@ func runAddCommand(cmd *cobra.Command, args []string) error {
 		return err
 	}
 	
-	// Check if rule already exists
-	if rs.RuleExists(ruleName) {
-		version, _ := rs.GetRuleVersion(ruleName)
-		return fmt.Errorf("rule '%s' already exists with version %s", ruleName, version)
+	// Check if rule already exists (using the full name for consistency)
+	if rs.RuleExists(identifier.FullName) {
+		version, _ := rs.GetRuleVersion(identifier.FullName)
+		return fmt.Errorf("rule '%s' already exists with version %s", identifier.FullName, version)
 	}
 	
 	// Create registry client
+	authConfig := auth.LoadAuthConfig()
 	client := registry.NewClient(cfg.RegistryURL)
+	client.SetAuthToken(authConfig.AccessToken)
 	
 	// Download rule
-	if err := downloadRule(client, ruleName, ruleVersion, rulesDir); err != nil {
+	if err := downloadRule(client, identifier, rulesDir); err != nil {
 		return fmt.Errorf("failed to download rule: %w", err)
 	}
 	
-	// Add rule to ruleset
-	rs.AddRule(ruleName, ruleVersion)
+	// Add rule to ruleset using the full name and actual version
+	rs.AddRule(identifier.FullName, identifier.Version)
 	if err := rs.SaveRuleSet(rulesJSONPath); err != nil {
 		return fmt.Errorf("failed to save ruleset: %w", err)
 	}
 	
-	color.Green("Rule '%s' (version %s) added successfully", ruleName, ruleVersion)
+	color.Green("Rule '%s' (version %s) added successfully", identifier.FullName, identifier.Version)
 	
 	// Print format suggestion at the very end if applicable
 	if formatSuggestion != "" {

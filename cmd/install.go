@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"rules-cli/internal/auth"
 	"rules-cli/internal/formats"
 	"rules-cli/internal/registry"
 	"rules-cli/internal/ruleset"
@@ -110,7 +111,9 @@ This ensures the rules directory matches exactly what's defined in rules.json.`,
 		}
 
 		// Create registry client
+		authConfig := auth.LoadAuthConfig()
 		client := registry.NewClient(cfg.RegistryURL)
+		client.SetAuthToken(authConfig.AccessToken)
 
 		// Install each rule from rules.json
 		color.Cyan("Installing rules from rules.json...")
@@ -131,7 +134,14 @@ This ensures the rules directory matches exactly what's defined in rules.json.`,
 		for ruleName, ruleVersion := range rs.Rules {
 			color.Cyan("Installing rule '%s' (version: %s)...", ruleName, ruleVersion)
 			
-			if err := client.DownloadRule(ruleName, ruleVersion, rulesDir); err != nil {
+			// Split the rule name into owner and rule parts
+			parts := strings.Split(ruleName, "/")
+			ownerSlug := parts[0]
+			ruleSlug := ""
+			if len(parts) > 1 {
+				ruleSlug = parts[1]
+			}
+			if err := client.DownloadRule(ownerSlug, ruleSlug, ruleVersion, rulesDir); err != nil {
 				color.Red("Error installing rule '%s': %v", ruleName, err)
 				errorCount++
 			} else {

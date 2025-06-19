@@ -31,16 +31,23 @@ func Initialize() (*Config, error) {
 	viper.AddConfigPath(".")
 
 	// Set default values
-	viper.SetDefault("registry_url", "https://api.continue.dev")
+	var default_api_base = "https://api.continue.dev"
+	// var defaultApiBase = "http://localhost:3001"
+	var client_id = "client_01J0FW6XN8N2XJAECF7NE0Y65J";
+	// var client_id = "client_01J0FW6XCPMJMQ3CG51RB4HBZQ";
+	var app_url = "https://hub.continue.dev"
+	// var app_url = "http://localhost:3000"
+
+	viper.SetDefault("registry_url", default_api_base)
 	viper.SetDefault("default_format", "default")
 	viper.SetDefault("username", "")
 	viper.SetDefault("email", "")
 	viper.SetDefault("formats", []string{"default"})
 	
 	// Set default values for auth-related configurations
-	viper.SetDefault("workos_client_id", "client_01J0FW6XN8N2XJAECF7NE0Y65J")
-	viper.SetDefault("app_url", "https://hub.continue.dev/")
-	viper.SetDefault("api_base", "https://api.continue.dev/")
+	viper.SetDefault("workos_client_id", client_id);
+	viper.SetDefault("app_url", app_url);
+	viper.SetDefault("api_base", default_api_base)
 
 	// Bind environment variables
 	viper.AutomaticEnv()
