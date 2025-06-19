@@ -15,6 +15,7 @@ type Config struct {
 	Username       string
 	Email          string
 	Formats        []string
+	AppURL         string
 }
 
 // Initialize sets up the configuration from environment variables and Viper
@@ -63,6 +64,7 @@ func Initialize() (*Config, error) {
 		Username:      viper.GetString("username"),
 		Email:         viper.GetString("email"),
 		Formats:       viper.GetStringSlice("formats"),
+		AppURL:        viper.GetString("app_url"),
 	}
 	
 	return &config, nil

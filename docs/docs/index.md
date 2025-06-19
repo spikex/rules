@@ -33,7 +33,7 @@ This will add them to your project in a local `.rules` folder.
 You can also download from GitHub rather than the rules registry:
 
 ```bash
-rules add gh:continuedev/continue-internal-rules
+rules add gh:continuedev/rules-template
 ```
 
 ## Render rules
@@ -41,30 +41,23 @@ rules add gh:continuedev/continue-internal-rules
 To use rules with your AI code assistant of choice, you can "render" them to the necessary format and location using `rules render`. For example,
 
 ```bash
-rules render continue
+rules render cursor
 ```
 
-will copy all of the `.rules/` into a `.continue/rules/` folder.
+will copy all of the `.rules/` into a `.cursor/rules/` folder. `rules` currently supports the following formats: cursor, continue, windsurf, claude, copilot, codex, cline, cody, and amp.
 
 ## Publish rules
 
-To make your rule available to others, you can publish a markdown file using `rules publish`:
+To make your rules available to others, you can publish using `rules publish`:
 
 ```bash
 rules login
 rules publish
 ```
 
-This would make your rule available to download with `rules add <your-username>/<your-ruleset-name>`.
+This would make your rule available to download with `rules add <name-of-rules>`.
 
-The command automatically determines the slug from your `rules.json` file and your authenticated user information. Make sure you have a `rules.json` file in your current directory with a `name` field, and an `index.md` file containing your rule content.
-
-<!--
-You can also publish a folder of markdown files:
-
-```bash
-rules publish ./my-rules
-``` -->
+The command automatically determines the slug from your `rules.json` file. To make sure you have a `rules.json` file in your current directory, use `rules init`.
 
 ## Helping users use your rules
 
@@ -72,4 +65,4 @@ If you are building a developer tool and want to optimize how AI IDEs work with 
 
 1. Make your account on the [registry](https://hub.continue.dev/signup) and create an organization
 2. [Publish your rules](index.md#publish-rules)
-3. Mention the corresponding `rules add <my-rules>` command in your documentation
+3. Mention the corresponding `rules add <name-of-rules>` command in your documentation
