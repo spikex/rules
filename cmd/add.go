@@ -53,40 +53,40 @@ func parseRuleIdentifier(ruleArg string) (*RuleIdentifier, error) {
 	identifier := &RuleIdentifier{
 		Version: "latest", // Default version
 	}
-	
+
 	// Handle GitHub repositories
 	if strings.HasPrefix(ruleArg, "gh:") {
 		// Format: gh:owner/repo or gh:owner/repo@version
 		repoPath := ruleArg[3:] // Remove "gh:" prefix
-		
+
 		// Check for version
 		if parts := strings.Split(repoPath, "@"); len(parts) > 1 {
 			repoPath = parts[0]
 			identifier.Version = parts[1]
 		}
-		
+
 		// Split owner/repo
 		repoParts := strings.Split(repoPath, "/")
 		if len(repoParts) != 2 {
 			return nil, fmt.Errorf("GitHub repository must be in format 'gh:owner/repo'")
 		}
-		
+
 		identifier.OwnerSlug = "gh:" + repoParts[0]
 		identifier.RuleSlug = repoParts[1]
 		identifier.FullName = ruleArg
-		
+
 		return identifier, nil
 	}
-	
+
 	// Handle registry rules
 	ruleName := ruleArg
-	
+
 	// Check if version is specified
 	if parts := strings.Split(ruleName, "@"); len(parts) > 1 {
 		ruleName = parts[0]
 		identifier.Version = parts[1]
 	}
-	
+
 	// Check if owner/rule format
 	if parts := strings.Split(ruleName, "/"); len(parts) == 2 {
 		identifier.OwnerSlug = parts[0]
@@ -101,7 +101,7 @@ func parseRuleIdentifier(ruleArg string) (*RuleIdentifier, error) {
 	} else {
 		return nil, fmt.Errorf("rule name must be in format 'owner/rule' or 'rulename'")
 	}
-	
+
 	return identifier, nil
 }
 
@@ -112,13 +112,13 @@ func setupRulesDirectory(format string) (rulesDir string, rulesJSONPath string, 
 	if err != nil {
 		return "", "", fmt.Errorf("failed to get rules directory: %w", err)
 	}
-	
+
 	// Get rules.json path
 	rulesJSONPath, err = formats.GetRulesJSONPath(format)
 	if err != nil {
 		return "", "", fmt.Errorf("failed to get rules.json path: %w", err)
 	}
-	
+
 	return rulesDir, rulesJSONPath, nil
 }
 
@@ -141,7 +141,7 @@ func loadOrCreateRuleSet(rulesJSONPath string) (*ruleset.RuleSet, error) {
 		if err := os.MkdirAll(filepath.Dir(rulesJSONPath), 0755); err != nil {
 			return nil, fmt.Errorf("failed to create directory for rules.json: %w", err)
 		}
-		
+
 		// Create a default ruleset
 		rs := ruleset.DefaultRuleSet(filepath.Base(filepath.Dir(rulesJSONPath)))
 		color.Cyan("Creating new rules.json file with default structure")
@@ -149,13 +149,13 @@ func loadOrCreateRuleSet(rulesJSONPath string) (*ruleset.RuleSet, error) {
 	} else if err != nil {
 		return nil, fmt.Errorf("failed to check rules.json file: %w", err)
 	}
-	
+
 	// Load existing ruleset
 	rs, err := ruleset.LoadRuleSet(rulesJSONPath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to load ruleset: %w", err)
 	}
-	
+
 	return rs, nil
 }
 
@@ -166,7 +166,7 @@ func downloadRule(client *registry.Client, identifier *RuleIdentifier, rulesDir 
 	} else {
 		color.Cyan("Downloading rule '%s/%s' (version %s) from registry API...", identifier.OwnerSlug, identifier.RuleSlug, identifier.Version)
 	}
-	
+
 	if err := client.DownloadRule(identifier.OwnerSlug, identifier.RuleSlug, identifier.Version, rulesDir); err != nil {
 		return "", fmt.Errorf("failed to download rule: %w", err)
 	}
@@ -193,11 +193,11 @@ func downloadRule(client *registry.Client, identifier *RuleIdentifier, rulesDir 
 			}
 		}
 	}
-	
+
 	// If we can't find or parse the version, return the requested version
 	return identifier.Version, nil
 }
-	
+
 // runAddCommand implements the main logic for the add command
 func runAddCommand(cmd *cobra.Command, args []string) error {
 	// Parse rule identifier
@@ -205,52 +205,52 @@ func runAddCommand(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return fmt.Errorf("invalid rule identifier: %w", err)
 	}
-	
+
 	// Setup rules directory
 	rulesDir, rulesJSONPath, err := setupRulesDirectory(format)
 	if err != nil {
 		return err
 	}
-	
+
 	// Check for format suggestions
 	formatSuggestion := getFormatSuggestion(rulesJSONPath)
-	
+
 	// Load or create ruleset
 	rs, err := loadOrCreateRuleSet(rulesJSONPath)
 	if err != nil {
 		return err
 	}
-	
+
 	// Check if rule already exists (using the full name for consistency)
 	if rs.RuleExists(identifier.FullName) {
 		version, _ := rs.GetRuleVersion(identifier.FullName)
 		return fmt.Errorf("rule '%s' already exists with version %s", identifier.FullName, version)
 	}
-	
+
 	// Create registry client
 	authConfig := auth.LoadAuthConfig()
 	client := registry.NewClient(cfg.RegistryURL)
 	client.SetAuthToken(authConfig.AccessToken)
-	
+
 	// Download rule and get the actual version
 	actualVersion, err := downloadRule(client, identifier, rulesDir)
 	if err != nil {
 		return fmt.Errorf("failed to download rule: %w", err)
 	}
-	
+
 	// Add rule to ruleset using the full name and actual version
 	rs.AddRule(identifier.FullName, actualVersion)
 	if err := rs.SaveRuleSet(rulesJSONPath); err != nil {
 		return fmt.Errorf("failed to save ruleset: %w", err)
 	}
-	
+
 	color.Green("Rule '%s' (version %s) added successfully", identifier.FullName, actualVersion)
-	
+
 	// Print format suggestion at the very end if applicable
 	if formatSuggestion != "" {
 		fmt.Println(formatSuggestion)
 	}
-	
+
 	return nil
 }
 

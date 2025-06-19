@@ -49,16 +49,16 @@ func createPackageZip(rulesPath string, tempDir string) (string, error) {
 	// Create temporary zip file
 	zipFileName := fmt.Sprintf("package-%d.zip", time.Now().Unix())
 	zipPath := filepath.Join(tempDir, zipFileName)
-	
+
 	zipFile, err := os.Create(zipPath)
 	if err != nil {
 		return "", fmt.Errorf("failed to create zip file: %w", err)
 	}
 	defer zipFile.Close()
-	
+
 	zipWriter := zip.NewWriter(zipFile)
 	defer zipWriter.Close()
-	
+
 	// Determine the source directory
 	sourceDir := "."
 	if rulesPath != "" {
@@ -68,56 +68,56 @@ func createPackageZip(rulesPath string, tempDir string) (string, error) {
 			sourceDir = filepath.Dir(rulesPath)
 		}
 	}
-	
+
 	// Walk through the directory and add files to zip
 	err = filepath.Walk(sourceDir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
-		
+
 		// Skip directories
 		if info.IsDir() {
 			return nil
 		}
-		
+
 		// Skip hidden files and directories
 		if strings.HasPrefix(info.Name(), ".") {
 			return nil
 		}
-		
+
 		// Skip temporary files
 		if strings.HasSuffix(info.Name(), ".tmp") || strings.HasSuffix(info.Name(), "~") {
 			return nil
 		}
-		
+
 		// Get relative path from source directory
 		relPath, err := filepath.Rel(sourceDir, path)
 		if err != nil {
 			return err
 		}
-		
+
 		// Create file in zip
 		zipFileWriter, err := zipWriter.Create(relPath)
 		if err != nil {
 			return err
 		}
-		
+
 		// Open source file
 		sourceFile, err := os.Open(path)
 		if err != nil {
 			return err
 		}
 		defer sourceFile.Close()
-		
+
 		// Copy file content to zip
 		_, err = io.Copy(zipFileWriter, sourceFile)
 		return err
 	})
-	
+
 	if err != nil {
 		return "", fmt.Errorf("failed to create package zip: %w", err)
 	}
-	
+
 	return zipPath, nil
 }
 
@@ -179,7 +179,7 @@ func runPublishCommand(cmd *cobra.Command, args []string) error {
 	client.SetAuthToken(authConfig.AccessToken)
 
 	// Generate version if not specified
-	packageVersion = rs.Version;
+	packageVersion = rs.Version
 
 	// Create temporary directory for package creation
 	tempDir, err := ioutil.TempDir("", "rules-publish-")

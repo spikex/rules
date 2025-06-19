@@ -48,7 +48,7 @@ func init() {
 	// Global flags
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.rules-cli/rules-cli.yaml)")
 	rootCmd.PersistentFlags().StringVar(&format, "format", "", "rule format (default is set in config)")
-	
+
 	// Version flag
 	rootCmd.Flags().BoolVarP(&version, "version", "v", false, "Display version information")
 }

@@ -20,7 +20,7 @@ func TestInitialize(t *testing.T) {
 	if cfg.RegistryURL == "" {
 		t.Error("RegistryURL should not be empty")
 	}
-	
+
 	if cfg.DefaultFormat == "" {
 		t.Error("DefaultFormat should not be empty")
 	}

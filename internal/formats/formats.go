@@ -27,7 +27,7 @@ func GetFormat(formatName string) Format {
 			IsSingleFile:    false,
 		}
 	}
-	
+
 	// Define formats based on render-formats.md
 	switch formatName {
 	case "continue":
@@ -106,18 +106,18 @@ func GetFormat(formatName string) Format {
 		}
 	}
 }
-	
+
 // InitializeFormat creates the directory structure for a format
 func InitializeFormat(formatName string) error {
 	format := GetFormat(formatName)
-	
+
 	if !format.IsSingleFile {
 		dirPath := format.DirectoryPrefix
 		if err := os.MkdirAll(dirPath, 0755); err != nil {
 			return fmt.Errorf("failed to create directory %s: %w", dirPath, err)
 		}
 	}
-	
+
 	// Create rules.json in the root directory if it doesn't exist
 	rulesJSONPath := "rules.json"
 	if _, err := os.Stat(rulesJSONPath); os.IsNotExist(err) {
@@ -129,12 +129,12 @@ func InitializeFormat(formatName string) error {
   "version": "1.0.0",
   "rules": {}
 }`
-		
+
 		if err := os.WriteFile(rulesJSONPath, []byte(defaultRulesJSON), 0644); err != nil {
 			return fmt.Errorf("failed to create rules.json: %w", err)
 		}
 	}
-	
+
 	return nil
 }
 
@@ -183,12 +183,12 @@ func GetFormatSuggestionMessage() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	
+
 	if len(formatFolders) > 0 {
-		return fmt.Sprintf("Found existing rules folder(s): %s\nConsider running 'rules render %s' to initialize rules.json from existing rules", 
+		return fmt.Sprintf("Found existing rules folder(s): %s\nConsider running 'rules render %s' to initialize rules.json from existing rules",
 			strings.Join(formatFolders, ", "), formatFolders[0]), nil
 	}
-	
+
 	return "", nil
 }
 

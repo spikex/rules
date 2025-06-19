@@ -29,7 +29,7 @@ func TestCLIIntegration(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			// Get the parent directory (project root)
 			parentDir := filepath.Join("..", ".")
-			
+
 			// Build the CLI from the parent directory
 			buildCmd := exec.Command("go", "build", "-o", "rules-test", ".")
 			buildCmd.Dir = parentDir
@@ -41,7 +41,7 @@ func TestCLIIntegration(t *testing.T) {
 			// Run the CLI command
 			cmd := exec.Command(filepath.Join(parentDir, "rules-test"), tt.args...)
 			output, err := cmd.CombinedOutput()
-			
+
 			// For help and version commands, exit code 0 is expected
 			if err != nil && (strings.Contains(string(output), "unknown") || !strings.Contains(string(output), tt.contains)) {
 				t.Fatalf("Command failed: %v, output: %s", err, output)
@@ -57,7 +57,7 @@ func TestCLIIntegration(t *testing.T) {
 func TestCLICommandsExist(t *testing.T) {
 	// Test that expected commands exist
 	parentDir := filepath.Join("..", ".")
-	
+
 	buildCmd := exec.Command("go", "build", "-o", "rules-test", ".")
 	buildCmd.Dir = parentDir
 	if err := buildCmd.Run(); err != nil {
@@ -67,10 +67,10 @@ func TestCLICommandsExist(t *testing.T) {
 
 	cmd := exec.Command(filepath.Join(parentDir, "rules-test"), "--help")
 	output, _ := cmd.CombinedOutput()
-	
+
 	// Check for expected subcommands
 	expectedCommands := []string{"help", "completion"}
-	
+
 	for _, expected := range expectedCommands {
 		if !strings.Contains(string(output), expected) {
 			t.Logf("Command '%s' not found in help output (this may be expected)", expected)

@@ -52,7 +52,7 @@ This ensures the rules directory matches exactly what's defined in rules.json.`,
 			suggestion, err := formats.GetFormatSuggestionMessage()
 			if err == nil && suggestion != "" {
 				formatSuggestion = suggestion
-		}
+			}
 		}
 
 		// Check if rules.json exists, create it if it doesn't
@@ -62,11 +62,11 @@ This ensures the rules directory matches exactly what's defined in rules.json.`,
 			if err := os.MkdirAll(filepath.Dir(rulesJSONPath), 0755); err != nil {
 				return fmt.Errorf("failed to create directory for rules.json: %w", err)
 			}
-			
+
 			// Create a default ruleset
 			rs = ruleset.DefaultRuleSet(filepath.Base(filepath.Dir(rulesJSONPath)))
 			color.Cyan("Creating new rules.json file with default structure")
-			
+
 			// Save the new ruleset
 			if err := rs.SaveRuleSet(rulesJSONPath); err != nil {
 				return fmt.Errorf("failed to create rules.json: %w", err)
@@ -106,20 +106,20 @@ This ensures the rules directory matches exactly what's defined in rules.json.`,
 		color.Cyan("Installing rules from rules.json...")
 		if len(rs.Rules) == 0 {
 			color.Yellow("No rules found in rules.json.")
-			
+
 			// Print format suggestion at the very end if applicable
 			if formatSuggestion != "" {
 				fmt.Println(formatSuggestion)
 			}
-	return nil
-}
+			return nil
+		}
 
 		successCount := 0
 		errorCount := 0
 
 		for ruleName, ruleVersion := range rs.Rules {
 			color.Cyan("Installing rule '%s' (version: %s)...", ruleName, ruleVersion)
-			
+
 			// Split the rule name into owner and rule parts
 			parts := strings.Split(ruleName, "/")
 			ownerSlug := parts[0]
@@ -137,16 +137,16 @@ This ensures the rules directory matches exactly what's defined in rules.json.`,
 
 		// Print summary
 		color.Green("\nInstallation complete: %d rules installed, %d failed", successCount, errorCount)
-		
+
 		// Print format suggestion at the very end if applicable
 		if formatSuggestion != "" {
 			fmt.Println(formatSuggestion)
 		}
-		
+
 		if errorCount > 0 {
 			return fmt.Errorf("%d rules failed to install", errorCount)
 		}
-		
+
 		return nil
 	},
 }
@@ -159,19 +159,19 @@ func removeContents(dir string) error {
 		return err
 	}
 	defer d.Close()
-	
+
 	entries, err := d.Readdirnames(-1)
 	if err != nil {
 		return err
 	}
-	
+
 	for _, entry := range entries {
 		err = os.RemoveAll(filepath.Join(dir, entry))
 		if err != nil {
 			return err
 		}
 	}
-	
+
 	return nil
 }
 

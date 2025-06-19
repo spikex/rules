@@ -10,12 +10,12 @@ import (
 
 // Config holds configuration for the rules CLI
 type Config struct {
-	RegistryURL    string
-	DefaultFormat  string
-	Username       string
-	Email          string
-	Formats        []string
-	AppURL         string
+	RegistryURL   string
+	DefaultFormat string
+	Username      string
+	Email         string
+	Formats       []string
+	AppURL        string
 }
 
 // Initialize sets up the configuration from environment variables and Viper
@@ -23,7 +23,7 @@ func Initialize() (*Config, error) {
 	// Set up Viper
 	viper.SetConfigName("rules-cli")
 	viper.SetConfigType("yaml")
-	
+
 	// Look for config in the user's home directory
 	home, err := os.UserHomeDir()
 	if err == nil {
@@ -34,7 +34,7 @@ func Initialize() (*Config, error) {
 	// Set default values
 	var default_api_base = "https://api.continue.dev"
 	// var defaultApiBase = "http://localhost:3001"
-	var client_id = "client_01J0FW6XN8N2XJAECF7NE0Y65J";
+	var client_id = "client_01J0FW6XN8N2XJAECF7NE0Y65J"
 	// var client_id = "client_01J0FW6XCPMJMQ3CG51RB4HBZQ";
 	var app_url = "https://hub.continue.dev"
 	// var app_url = "http://localhost:3000"
@@ -44,10 +44,10 @@ func Initialize() (*Config, error) {
 	viper.SetDefault("username", "")
 	viper.SetDefault("email", "")
 	viper.SetDefault("formats", []string{"default"})
-	
+
 	// Set default values for auth-related configurations
-	viper.SetDefault("workos_client_id", client_id);
-	viper.SetDefault("app_url", app_url);
+	viper.SetDefault("workos_client_id", client_id)
+	viper.SetDefault("app_url", app_url)
 	viper.SetDefault("api_base", default_api_base)
 
 	// Bind environment variables
@@ -66,7 +66,7 @@ func Initialize() (*Config, error) {
 		Formats:       viper.GetStringSlice("formats"),
 		AppURL:        viper.GetString("app_url"),
 	}
-	
+
 	return &config, nil
 }
 

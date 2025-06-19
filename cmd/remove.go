@@ -57,20 +57,20 @@ For GitHub repositories, use the same gh: prefix as when adding.`,
 
 		// Calculate rule directory path
 		ruleDir := filepath.Join(rulesDir, ruleName)
-		
+
 		// Delete rule directory and files
 		if err := os.RemoveAll(ruleDir); err != nil {
 			color.Red("Warning: Failed to delete rule files: %v", err)
 			// Continue anyway to remove from rules.json
 		} else {
 			color.Cyan("Deleted rule files from %s", ruleDir)
-			
+
 			// Check if parent directory is empty and delete it if so
 			if strings.Contains(ruleName, "/") {
 				// Get the parent directory name (e.g., "starter" from "starter/nextjs-rules")
 				parentName := ruleName[:strings.LastIndex(ruleName, "/")]
 				parentDir := filepath.Join(rulesDir, parentName)
-				
+
 				// Check if parent directory exists and is empty
 				if entries, err := os.ReadDir(parentDir); err == nil && len(entries) == 0 {
 					os.Remove(parentDir)

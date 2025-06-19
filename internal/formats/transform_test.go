@@ -126,23 +126,23 @@ Test content.`,
 				t.Fatalf("TransformRuleContent failed: %v", err)
 			}
 
-	resultStr := string(result)
-	
+			resultStr := string(result)
+
 			// Should not contain "null" values
 			if strings.Contains(resultStr, ": null") {
 				t.Errorf("Result should not contain null values. Got:\n%s", resultStr)
-	}
-	
+			}
+
 			// Should not contain quoted empty strings
 			if strings.Contains(resultStr, `: ""`) || strings.Contains(resultStr, `: ''`) {
 				t.Errorf("Result should not contain quoted empty strings. Got:\n%s", resultStr)
-	}
-	
+			}
+
 			// Should contain expected content
 			if !strings.Contains(resultStr, tt.expected) {
 				t.Errorf("Result should contain '%s'. Got:\n%s", tt.expected, resultStr)
 			}
-			
+
 			// Should preserve body content
 			if !strings.Contains(resultStr, "# Test Rule") {
 				t.Errorf("Result should preserve body content. Got:\n%s", resultStr)
@@ -212,7 +212,7 @@ func TestCleanMetadataForYAML(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := cleanMetadataForYAML(tt.input)
-			
+
 			// Check each expected key-value pair
 			for key, expectedValue := range tt.expected {
 				actualValue := result[key]
@@ -226,7 +226,7 @@ func TestCleanMetadataForYAML(t *testing.T) {
 					t.Errorf("For key '%s': expected %#v, got %#v", key, expectedValue, actualValue)
 				}
 			}
-			
+
 			// Check that no extra keys were added
 			if len(result) != len(tt.expected) {
 				t.Errorf("Expected %d keys, got %d", len(tt.expected), len(result))
@@ -254,16 +254,16 @@ Test content.`
 	}
 
 	resultStr := string(result)
-	
+
 	// Verify YAML structure is correct
 	if !strings.Contains(resultStr, "---\n") {
 		t.Error("Result should start with YAML frontmatter delimiter")
 	}
-	
+
 	if !strings.Contains(resultStr, "\n---\n") {
 		t.Error("Result should end YAML frontmatter with delimiter")
 	}
-	
+
 	// Verify no null values in YAML
 	yamlLines := strings.Split(resultStr, "\n")
 	for i, line := range yamlLines {

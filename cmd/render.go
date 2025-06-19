@@ -23,9 +23,9 @@ Supported formats: continue, cursor, windsurf, claude, copilot, codex, cline, co
 		if len(args) < 1 {
 			return fmt.Errorf("format is required")
 		}
-		
+
 		formatName := args[0]
-		
+
 		if formatName == "default" {
 			return fmt.Errorf("cannot render to default format as it is the source")
 		}
@@ -41,7 +41,7 @@ Supported formats: continue, cursor, windsurf, claude, copilot, codex, cline, co
 		}
 
 		fmt.Printf("Rendering rules to %s format...\n", formatName)
-		
+
 		// Use the formats package to handle the rendering based on the target format
 		verbose, _ := cmd.Flags().GetBool("verbose")
 		if err := formats.RenderRulesToFormat(sourceDir, formatName, verbose); err != nil {

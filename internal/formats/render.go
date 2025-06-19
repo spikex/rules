@@ -18,12 +18,12 @@ type RenderOptions struct {
 func RenderRulesToFormat(sourceDir string, targetFormatName string, verbose bool) error {
 	// Get the target format
 	targetFormat := GetFormat(targetFormatName)
-	
+
 	// Check if source directory exists
 	if _, err := os.Stat(sourceDir); os.IsNotExist(err) {
 		return fmt.Errorf("source directory %s does not exist", sourceDir)
 	}
-	
+
 	// For single file formats, make sure the parent directory exists
 	if targetFormat.IsSingleFile {
 		parentDir := filepath.Dir(targetFormat.SingleFilePath)
@@ -38,7 +38,7 @@ func RenderRulesToFormat(sourceDir string, targetFormatName string, verbose bool
 			return fmt.Errorf("failed to create target directory %s: %w", targetFormat.DirectoryPrefix, err)
 		}
 	}
-	
+
 	// Process the rule files
 	return ProcessRuleFiles(sourceDir, targetFormat)
 }

@@ -12,7 +12,7 @@ import (
 
 // CommandConfig represents a mapping between a command and its golden file
 type CommandConfig struct {
-	Command   string
+	Command    string
 	GoldenFile string
 }
 
@@ -27,7 +27,7 @@ func readCommandConfigs() (map[string]string, error) {
 
 	// Map golden files to their commands
 	goldenToCommand := make(map[string]string)
-	
+
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		line := scanner.Text()
@@ -35,7 +35,7 @@ func readCommandConfigs() (map[string]string, error) {
 		if strings.HasPrefix(line, "#") || strings.TrimSpace(line) == "" {
 			continue
 		}
-		
+
 		parts := strings.Split(line, "|")
 		if len(parts) == 2 {
 			cmd := strings.TrimSpace(parts[0])
@@ -44,11 +44,11 @@ func readCommandConfigs() (map[string]string, error) {
 			goldenToCommand[goldenFile] = cmd
 		}
 	}
-	
+
 	if err := scanner.Err(); err != nil {
 		return nil, err
 	}
-	
+
 	return goldenToCommand, nil
 }
 
@@ -69,7 +69,7 @@ func matchWithPlaceholders(actual, expected string) bool {
 		if !strings.HasPrefix(actual, beforeState) {
 			return false
 		}
-		
+
 		// Handle the error placeholder if it exists
 		if strings.Contains(afterState, "<ERROR_PLACEHOLDER>") {
 			beforeError := afterState[:strings.Index(afterState, "<ERROR_PLACEHOLDER>")]
@@ -83,7 +83,7 @@ func matchWithPlaceholders(actual, expected string) bool {
 
 			// Extract the UUID
 			stateValue := actual[len(beforeState):stateEnd]
-			
+
 			// Validate UUID format (simple check)
 			if !strings.Contains(stateValue, "-") || len(stateValue) < 30 {
 				return false
@@ -91,13 +91,13 @@ func matchWithPlaceholders(actual, expected string) bool {
 
 			// Remaining text after error message
 			remainingText := actual[stateEnd+len(beforeError):]
-			
+
 			// Check if error message is valid (either "unexpected newline" or "EOF")
-			if !strings.HasPrefix(remainingText, "unexpected newline") && 
-			   !strings.HasPrefix(remainingText, "EOF") {
+			if !strings.HasPrefix(remainingText, "unexpected newline") &&
+				!strings.HasPrefix(remainingText, "EOF") {
 				return false
 			}
-			
+
 			// Check the final part after the error message
 			errorMsgEnd := 0
 			if strings.HasPrefix(remainingText, "unexpected newline") {
@@ -105,7 +105,7 @@ func matchWithPlaceholders(actual, expected string) bool {
 			} else if strings.HasPrefix(remainingText, "EOF") {
 				errorMsgEnd = len("EOF")
 			}
-			
+
 			return strings.HasPrefix(remainingText[errorMsgEnd:], afterError)
 		} else {
 			// Just check if the remaining text appears after the state
@@ -123,21 +123,21 @@ func TestGoldenFiles(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to read command configurations: %v", err)
 	}
-	
+
 	if len(goldenToCommand) == 0 {
 		t.Fatal("No commands configured. Check golden_commands.txt file.")
 	}
-	
+
 	// Find all golden files
 	goldenFiles, err := filepath.Glob("golden/**/*.golden")
 	if err != nil {
 		t.Fatalf("Failed to find golden files: %v", err)
 	}
-	
+
 	if len(goldenFiles) == 0 {
 		t.Fatal("No golden files found. Run scripts/generate_golden.sh first.")
 	}
-	
+
 	// Make sure the CLI binary exists
 	cliPath := "../rules-cli"
 	if _, err := os.Stat(cliPath); os.IsNotExist(err) {
@@ -149,13 +149,13 @@ func TestGoldenFiles(t *testing.T) {
 			t.Fatalf("Failed to get version from package.json: %v", err)
 		}
 		version := strings.TrimSpace(string(versionBytes))
-		
+
 		cmd := exec.Command("go", "build", "-ldflags", fmt.Sprintf("-X main.Version=%s -X rules-cli/internal/utils.Version=%s", version, version), "-o", cliPath, "../main.go")
 		if err := cmd.Run(); err != nil {
 			t.Fatalf("Failed to build CLI: %v", err)
 		}
 	}
-	
+
 	for _, goldenFile := range goldenFiles {
 		t.Run(goldenFile, func(t *testing.T) {
 			// Look up the command for this golden file
@@ -164,31 +164,31 @@ func TestGoldenFiles(t *testing.T) {
 				t.Skipf("No command configured for golden file: %s", goldenFile)
 				return
 			}
-			
+
 			// Create a temporary directory for this test
 			tempDir, err := os.MkdirTemp("", "rules-cli-test-*")
 			if err != nil {
 				t.Fatalf("Failed to create temporary directory: %v", err)
 			}
 			defer os.RemoveAll(tempDir)
-			
+
 			// Copy the CLI binary to the temporary directory
 			tempCliPath := filepath.Join(tempDir, "rules-cli")
 			if err := copyFile(cliPath, tempCliPath); err != nil {
 				t.Fatalf("Failed to copy CLI binary: %v", err)
 			}
-			
+
 			// Change to the temporary directory
 			originalDir, err := os.Getwd()
 			if err != nil {
 				t.Fatalf("Failed to get current directory: %v", err)
 			}
 			defer os.Chdir(originalDir)
-			
+
 			if err := os.Chdir(tempDir); err != nil {
 				t.Fatalf("Failed to change to temporary directory: %v", err)
 			}
-			
+
 			// Run prerequisite commands based on the current command
 			if strings.HasPrefix(cmd, "add ") {
 				// For add commands, run init first to create rules.json
@@ -217,26 +217,26 @@ func TestGoldenFiles(t *testing.T) {
 					t.Logf("Add command failed (this might be expected): %v", err)
 				}
 			}
-			
+
 			// Split the command into arguments
 			var args []string
 			if cmd != "" {
 				args = strings.Fields(cmd)
 			}
-			
+
 			// Run the command
 			execCmd := exec.Command(tempCliPath, args...)
 			output, err := execCmd.CombinedOutput()
-			
+
 			// We don't fail the test if the command returns non-zero
 			// because some golden files might be testing error cases
-			
+
 			// Read expected output
 			expectedBytes, err := os.ReadFile(filepath.Join(originalDir, goldenFile))
 			if err != nil {
 				t.Fatalf("Failed to read golden file: %v", err)
 			}
-			
+
 			expected := string(expectedBytes)
 			actual := string(output)
 
@@ -313,7 +313,7 @@ func copyFile(src, dst string) error {
 	if err != nil {
 		return err
 	}
-	
+
 	// Make the copied file executable
 	return os.Chmod(dst, 0755)
 }
@@ -322,15 +322,15 @@ func copyFile(src, dst string) error {
 func TestHelp(t *testing.T) {
 	// This test just makes sure the CLI can run and produce some output
 	// It's useful for initial verification of the test setup
-	
+
 	cmd := exec.Command("../rules-cli", "--help")
 	output, err := cmd.CombinedOutput()
-	
+
 	if err != nil {
 		t.Logf("Command output: %s", string(output))
 		t.Fatalf("Command failed: %v", err)
 	}
-	
+
 	if len(output) == 0 {
 		t.Error("Help command produced no output")
 	}

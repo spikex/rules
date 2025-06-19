@@ -69,7 +69,7 @@ This command does not modify the rules.json file.`,
 			if err != nil {
 				return fmt.Errorf("failed to get tags: %w", err)
 			}
-			
+
 			if tagsInput != "" {
 				rule.Tags = strings.Split(tagsInput, ",")
 				// Trim whitespace from tags

@@ -30,11 +30,11 @@ var whoamiCmd = &cobra.Command{
 
 		// Display user information
 		color.Green("Authenticated User:")
-		
+
 		if authConfig.UserID != "" {
 			fmt.Printf("User ID: %s\n", authConfig.UserID)
 		}
-		
+
 		if authConfig.UserEmail != "" {
 			fmt.Printf("Email: %s\n", authConfig.UserEmail)
 		}

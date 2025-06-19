@@ -139,7 +139,7 @@ func FindRuleSetFile(path string) (string, error) {
 		if err != nil {
 			return "", fmt.Errorf("path does not exist: %w", err)
 		}
-		
+
 		if stat.IsDir() {
 			// If it's a directory, look for rules.json inside it
 			rulesPath := filepath.Join(path, "rules.json")
@@ -155,18 +155,18 @@ func FindRuleSetFile(path string) (string, error) {
 			return "", fmt.Errorf("specified file is not rules.json")
 		}
 	}
-	
+
 	// Look for rules.json in current directory
 	currentDir, err := os.Getwd()
 	if err != nil {
 		return "", fmt.Errorf("failed to get current directory: %w", err)
 	}
-	
+
 	rulesPath := filepath.Join(currentDir, "rules.json")
 	if _, err := os.Stat(rulesPath); err == nil {
 		return rulesPath, nil
 	}
-	
+
 	return "", fmt.Errorf("rules.json not found in current directory")
 }
 
@@ -176,6 +176,6 @@ func LoadRuleSetFromPath(path string) (*RuleSet, error) {
 	if err != nil {
 		return nil, err
 	}
-	
+
 	return LoadRuleSet(rulesPath)
 }
