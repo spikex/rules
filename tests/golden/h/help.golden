@@ -15,7 +15,7 @@ Available Commands:
   install     Synchronize rules directory with rules.json
   login       Authenticate with the registry service
   logout      Log out from the registry service
-  publish     Publish a rule file to the registry
+  publish     Publish a rule package to the registry
   remove      Remove a rule from the ruleset
   render      Render rules to a specific format
   whoami      Display information about the currently authenticated user

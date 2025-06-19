@@ -4,14 +4,12 @@ Usage:
 
 Examples:
   rules remove vercel/nextjs
-  rules remove redis --delete
-  rules remove workos/authkit-nextjs --delete --force
-  rules remove gh:owner/repo --delete
+  rules remove redis
+  rules remove workos/authkit-nextjs
+  rules remove gh:owner/repo
 
 Flags:
-      --delete   Also delete rule files from disk
-      --force    Skip confirmation prompts
-  -h, --help     help for remove
+  -h, --help   help for remove
 
 Global Flags:
       --config string   config file (default is $HOME/.rules-cli/rules-cli.yaml)
