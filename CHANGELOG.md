@@ -1,3 +1,14 @@
+## [1.1.3](https://github.com/continuedev/rules-cli/compare/v1.1.2...v1.1.3) (2025-06-19)
+
+
+### Bug Fixes
+
+* auth and update docs ([9333780](https://github.com/continuedev/rules-cli/commit/93337804e4655539aef2e5ccd95df28eec6fb874))
+* default license to CC0-1.0 ([eed58de](https://github.com/continuedev/rules-cli/commit/eed58de3b5b1d08b3940f7d951a30c0c30a37f17))
+* output a link when publishing ([25160bc](https://github.com/continuedev/rules-cli/commit/25160bc01f311a9c82ff9fb054876d953358b3c4))
+* update copy ([35f650b](https://github.com/continuedev/rules-cli/commit/35f650b0629d43cdf6da88af48045bb83f20e414))
+* update rules add gh: to download entire repo ([fb0e36c](https://github.com/continuedev/rules-cli/commit/fb0e36c24621ec6b2d7b1118ca6f549e29b7c7d3))
+
 ## [1.1.2](https://github.com/continuedev/rules-cli/compare/v1.1.1...v1.1.2) (2025-06-19)
 
 
