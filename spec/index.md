@@ -204,7 +204,7 @@ rules publish --visibility private
   - Uses the registry API's POST endpoint to publish the rule
   - Requires user to be logged in (uses Bearer auth)
   - Sets the visibility of the published rule according to the flag
-  - Returns a confirmation message with the published rule's details
+  - Returns a confirmation message with the published rule's details, including the URL where the rule is available
 
 ### `rules whoami`
 

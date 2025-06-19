@@ -204,7 +204,10 @@ func runPublishCommand(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("failed to publish rule: %w", err)
 	}
 
-	color.Green("Successfully published package '%s/%s' (version %s)", rs.Name, packageVersion)
+	// Create the URL for the published rule
+	ruleURL := fmt.Sprintf("%s/%s/versions/%s", cfg.AppURL, rs.Name, packageVersion)
+	color.Green("Successfully published package '%s' (version %s)", rs.Name, packageVersion)
+	color.Green("Your rule is now available at: %s", ruleURL)
 	return nil
 }
 
