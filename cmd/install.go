@@ -27,6 +27,12 @@ Performs a clean installation by:
 This ensures the rules directory matches exactly what's defined in rules.json.`,
 	Example: `  rules install`,
 	RunE: func(cmd *cobra.Command, args []string) error {
+		// Check if arguments were provided
+		if len(args) > 0 {
+			color.Yellow("Did you mean 'rules add %s' instead?", strings.Join(args, " "))
+			return fmt.Errorf("install command does not accept arguments")
+		}
+
 		// Get rules directory for the format
 		rulesDir, err := formats.GetRulesDirectory(format)
 		if err != nil {
@@ -46,9 +52,9 @@ This ensures the rules directory matches exactly what's defined in rules.json.`,
 			suggestion, err := formats.GetFormatSuggestionMessage()
 			if err == nil && suggestion != "" {
 				formatSuggestion = suggestion
-			}
 		}
-		
+		}
+
 		// Check if rules.json exists, create it if it doesn't
 		var rs *ruleset.RuleSet
 		if _, err := os.Stat(rulesJSONPath); os.IsNotExist(err) {
@@ -105,9 +111,8 @@ This ensures the rules directory matches exactly what's defined in rules.json.`,
 			if formatSuggestion != "" {
 				fmt.Println(formatSuggestion)
 			}
-			
-			return nil
-		}
+	return nil
+}
 
 		successCount := 0
 		errorCount := 0
