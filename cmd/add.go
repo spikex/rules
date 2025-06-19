@@ -30,8 +30,9 @@ For GitHub repositories, use the gh: prefix followed by the owner/repo.
 For example: gh:owner/repo
 
 When importing from GitHub repositories, the tool will:
-- Download all files from the 'src/' directory in the repository
-- Use the main branch of the repository by default`,
+- Download all files in the repository
+- Use the main branch of the repository by default
+- Look for rules.json in the downloaded files to find the version`,
 	Example: `  rules add vercel/nextjs
   rules add redis
   rules add gh:owner/repo`,
@@ -161,7 +162,7 @@ func loadOrCreateRuleSet(rulesJSONPath string) (*ruleset.RuleSet, error) {
 // downloadRule downloads a rule from the registry
 func downloadRule(client *registry.Client, identifier *RuleIdentifier, rulesDir string) (string, error) {
 	if strings.HasPrefix(identifier.FullName, "gh:") {
-		color.Cyan("Downloading rules from GitHub repository '%s' (src/ directory)...", identifier.FullName[3:])
+		color.Cyan("Downloading rules from GitHub repository '%s'...", identifier.FullName[3:])
 	} else {
 		color.Cyan("Downloading rule '%s/%s' (version %s) from registry API...", identifier.OwnerSlug, identifier.RuleSlug, identifier.Version)
 	}
@@ -171,7 +172,13 @@ func downloadRule(client *registry.Client, identifier *RuleIdentifier, rulesDir 
 	}
 
 	// Check for the actual version in the downloaded rule.json file
-	ruleDir := filepath.Join(rulesDir, identifier.OwnerSlug, identifier.RuleSlug)
+	var ruleDir string
+	if strings.HasPrefix(identifier.FullName, "gh:") {
+		ruleDir = filepath.Join(rulesDir, "gh:"+identifier.OwnerSlug[3:]+"/"+identifier.RuleSlug)
+	} else {
+		ruleDir = filepath.Join(rulesDir, identifier.OwnerSlug, identifier.RuleSlug)
+	}
+
 	ruleInfoPath := filepath.Join(ruleDir, "rules.json")
 
 	if _, err := os.Stat(ruleInfoPath); err == nil {
@@ -187,8 +194,8 @@ func downloadRule(client *registry.Client, identifier *RuleIdentifier, rulesDir 
 		}
 	}
 	
-	// If we can't find or parse the version, return an error
-	return "", fmt.Errorf("could not find or parse version from the downloaded rule")
+	// If we can't find or parse the version, return the requested version
+	return identifier.Version, nil
 }
 	
 // runAddCommand implements the main logic for the add command
