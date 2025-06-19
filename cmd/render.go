@@ -14,7 +14,9 @@ var renderCmd = &cobra.Command{
 	Short: "Render rules to a specific format",
 	Long: `Renders existing rules to a specified format.
 Copies all rules from the default location (.rules/) to the target format
-as described in render-formats.md.`,
+as described in render-formats.md.
+
+Supported formats: continue, cursor, windsurf, claude, copilot, codex, cline, cody, amp`,
 	Example: `  rules render cursor
   rules render continue`,
 	RunE: func(cmd *cobra.Command, args []string) error {
