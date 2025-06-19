@@ -3,8 +3,8 @@ import type { Config } from "@docusaurus/types";
 import { themes as prismThemes } from "prism-react-renderer";
 
 const config: Config = {
-  title: "My Simple Site",
-  tagline: "A single page Docusaurus site",
+  title: "", // Empty because the "title" of index.md is shown
+  tagline: "The CLI for managing AI rules",
   favicon: "img/favicon.ico",
 
   future: {

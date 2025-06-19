@@ -1,5 +1,5 @@
 ---
-title: rules
+title: rules CLI
 ---
 
 # rules
@@ -10,7 +10,7 @@ title: rules
 
 :::
 
-`rules` is a CLI built for managing rules across any AI developer tool. Rules are markdown files that encode workflows, preferences, tech stack details, and more in plain natural language so you can get better help from LLMs.
+`rules` is a CLI built for managing rules across any AI IDE. Rules are markdown files that encode workflows, preferences, tech stack details, and more in plain natural language so you can get better help from LLMs.
 
 ## Install `rules`
 
@@ -38,7 +38,7 @@ rules add gh:continuedev/rules-template
 
 ## Render rules
 
-To use rules with your AI code assistant of choice, you can "render" them to the necessary format and location using `rules render`. For example,
+To use rules with your AI IDE of choice, you can "render" them to the necessary format and location using `rules render`. For example,
 
 ```bash
 rules render cursor
