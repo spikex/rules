@@ -39,8 +39,7 @@ The version can be specified with --version flag, defaults to timestamp-based ve
 Examples:
   rules publish                           # Publish from current directory
   rules publish ./my-rules                # Publish from specified directory
-  rules publish --visibility private      # Publish as private
-  rules publish --version 1.0.0          # Publish with specific version`,
+  rules publish --visibility private      # Publish as private`,
 	Args: cobra.MaximumNArgs(1),
 	RunE: runPublishCommand,
 }
