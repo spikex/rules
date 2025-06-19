@@ -76,158 +76,21 @@ This is the body of the rule. It supports Markdown syntax.
 
 ## Commands
 
-### `rules init`
+### Core Commands
 
-Creates initial rule directory structure.
+- [`rules init`](commands/init.md) - Creates initial rule directory structure
+- [`rules create`](commands/create.md) - Creates a new rule file in the rules directory
+- [`rules add`](commands/add.md) - Adds a rule to the project
+- [`rules remove`](commands/remove.md) - Removes a rule from the project
+- [`rules render`](commands/render.md) - Renders existing rules to a specified format
+- [`rules install`](commands/install.md) - Synchronizes the `.rules` directory with the contents of `rules.json`
 
-- **Flags**:
-  - `--format string`: Set rule format
-- **Behavior**:
-  - Creates directory structure
-  - Initializes empty rules.json
-  - Sets up format-specific configuration
-  - Default format creates `.rules/` directory
-  - Custom formats create `.{format}/rules/` directories
+### Registry Commands
 
-### `rules create`
-
-Creates a new rule file in the rules directory.
-
-```bash
-# Create new rules with interactive walkthrough that lets you choose triggers and write rules
-rules create
-rules create --tags frontend --globs *.{tsx,jsx} --description "Style guide for writing React components" "This is the body of the rule"
-rules create --alwaysApply # Body not supplied, so will prompt for it interactively
-```
-
-- **Flags**:
-  - `--tags`: Comma-separated list of tags
-  - `--globs`: Glob patterns to match files
-  - `--description`: Short description
-  - `--alwaysApply`: Flag to always apply rule
-- **Args**:
-  - Optional rule body as last argument
-- **Behavior**:
-  - Prompts for missing fields if not provided
-  - Allows for stdin/editor input for rule body
-  - Creates a new rule (.md) file in the root of the rules directory
-  - Does not modify the rules.json file
-
-### `rules add`
-
-Adds a rule to the project.
-
-```bash
-rules add vercel/nextjs
-rules add gh:owner/repo
-```
-
-- **Args**:
-  - Name of ruleset to add (with optional `gh:` prefix for GitHub repositories)
-- **Behavior**:
-  - If rules.json doesn't exist, creates it with default structure and adds the rule
-  - Downloads rule files from the registry to appropriate folder (e.g. `.rules/vercel/nextjs/`) using the [registry API GET endpoint](registry-api.md#get)
-  - Adds the rule to rules.json "rules" object with the literal version that was downloaded
-  - For GitHub repos (`gh:` prefix):
-    - Downloads all files in the repository
-    - Uses the main branch by default
-    - Looks for rules.json in the downloaded files to find the version, just like with the normal `add` command
-  - When rules.json doesn't exist:
-    - Checks for any top-level folder of the structure ".{folder-name}/rules"
-    - If one exists, suggests to the user to run `rules render {folder-name}`
-
-### `rules remove`
-
-Removes a rule from the project.
-
-```bash
-rules remove vercel/nextjs
-rules remove gh:owner/repo
-```
-
-- **Args**:
-  - Name of ruleset to remove (including GitHub-sourced rules)
-- **Behavior**:
-  - Removes rule reference from rules.json
-  - Deletes rule files from `.rules` folder
-
-### `rules render`
-
-Renders existing rules to a specified format.
-
-```bash
-rules render cursor
-rules render continue
-```
-
-- **Args**:
-  - Name of format to render rules to (e.g. "continue", "cursor")
-- **Behavior**:
-  - Copies all rules from the default location (`.rules/`) to the target format as described in [render-formats.md](render-formats.md)
-  - Does not modify the original rule files
-
-### `rules install`
-
-Synchronizes the `.rules` directory with the contents of `rules.json`.
-
-```bash
-rules install
-```
-
-- **Behavior**:
-  - Performs a clean installation by:
-    - Removing all existing rule files and directories first
-    - Re-downloading and installing all rules specified in `rules.json`
-  - Ensures the `.rules` directory exactly matches what's defined in `rules.json`
-  - Reports on installation progress and any errors encountered
-
-### `rules publish`
-
-Publishes a rule file to the registry.
-
-```bash
-rules publish                    # Publish from current directory
-rules publish ./my-rules         # Publish from specified directory
-rules publish --visibility private
-```
-
-- **Args**:
-  - Optional path to directory containing rules.json (defaults to current directory)
-- **Flags**:
-  - `--visibility`: Set the visibility of the rule to "public" or "private" (default: "public")
-- **Behavior**:
-  - Reads the slug from rules.json in the current directory or specified path
-  - The slug is constructed as `{organization}/{ruleset-name}` where:
-    - `organization` is determined from the authenticated user's organization slug, username, or email prefix
-    - `ruleset-name` is the "name" field from rules.json
-  - Automatically finds the main rule file to publish (index.md or first .md file found)
-  - Uses the registry API's POST endpoint to publish the rule
-  - Requires user to be logged in (uses Bearer auth)
-  - Sets the visibility of the published rule according to the flag
-  - Returns a confirmation message with the published rule's details, including the URL where the rule is available
-
-### `rules whoami`
-
-Displays information about the currently authenticated user.
-
-```bash
-rules whoami
-```
-
-- **Behavior**:
-  - Checks if the user is currently logged in
-  - If logged in, displays user information (username, email, organization)
-  - If not logged in, displays a message indicating the user is not authenticated
-  - Uses the authentication information stored in the auth file
-  - May make a request to the registry API to fetch the latest user information
-
-### `rules login`
-
-Starts the authorization flow using utilities defined in [the auth folder](../internal/auth/) and saves auth information.
-
-### `rules logout`
-
-Logs the user out by removing the auth file. Use utilities defined in [the auth folder](../internal/auth/).
+- [`rules publish`](commands/publish.md) - Publishes a rule file to the registry
+- [`rules whoami`](commands/whoami.md) - Displays information about the currently authenticated user
+- [`rules login`](commands/login.md) - Starts the authorization flow and saves auth information
+- [`rules logout`](commands/logout.md) - Logs the user out by removing the auth file
 
 ## Error Handling
 
@@ -240,7 +103,3 @@ Logs the user out by removing the auth file. Use utilities defined in [the auth 
 - Uses Viper for configuration management
 - Supports environment variables
 - Configuration file stored in user's config directory
-
-# Task
-
-Please implement the entire command line tool described above in the current directory.
