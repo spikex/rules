@@ -1,68 +1,64 @@
-# Private Homebrew Tap for Continue Dev Tools
+# rules
 
-This is a private Homebrew tap for internal Continue Dev tools.
+:::tip
 
-## Installation Options
+**tl;dr:** `npm i -g rules-cli` then `rules add starter/nextjs-rules`
 
-### Option 1: Using NPM (Cross-platform)
+:::
 
-You can install and run the rules CLI using npm:
+`rules` is a CLI built for managing rules across any AI developer tool. Rules are markdown files that encode workflows, preferences, tech stack details, and more in plain natural language so you can get better help from LLMs.
 
-```bash
-# Install globally
-npm install -g rules-cli
+## Install `rules`
 
-# Run the CLI
-rules-cli
-
-# Or run directly without installing
-npx rules-cli
-```
-
-The npm package provides binaries for:
-
-- macOS (x64, arm64)
-- Linux (x64, arm64)
-- Windows (x64)
-
-### Option 2: Using Homebrew (macOS/Linux)
-
-#### Prerequisites
-
-- You must have [Homebrew](https://brew.sh/) installed
-- You need Git SSH access to the private repositories at Continue Dev
-
-#### 1. Tap the Repository
+The `rules` CLI can be installed using NPM:
 
 ```bash
-# Using SSH (recommended for private repos)
-brew tap continuedev/tap git@github.com:continuedev/homebrew-tap.git
+npm i -g rules-cli
 ```
 
-#### 2. Install the Rules CLI Tool
+## Add rules
+
+To download rules to your repository you can use `rules add`. For example:
 
 ```bash
-brew install rules
+rules add starter/nextjs-rules
 ```
 
-#### Updating
+This will add them to your project in a local `.rules` folder.
 
-To get the latest version:
+You can also download from GitHub rather than the rules registry:
 
 ```bash
-brew update
-brew upgrade rules
+rules add gh:continuedev/rules-template
 ```
 
-## Available Tools
+## Render rules
 
-- `rules`: Internal rules CLI tool for Continue Dev
+To use rules with your AI code assistant of choice, you can "render" them to the necessary format and location using `rules render`. For example,
 
-## Troubleshooting
+```bash
+rules render cursor
+```
 
-If you encounter issues:
+will copy all of the `.rules/` into a `.cursor/rules/` folder. `rules` currently supports the following formats: cursor, continue, windsurf, claude, copilot, codex, cline, cody, and amp.
 
-- Ensure you have SSH access to the `continuedev/rules-cli` repository
-- Make sure your SSH key is loaded (`ssh-add -l` to check)
-- Try running `brew doctor` to check for general Homebrew issues
-- If the formula fails to install, try with verbose output: `brew install -v rules`
+## Publish rules
+
+To make your rules available to others, you can publish using `rules publish`:
+
+```bash
+rules login
+rules publish
+```
+
+This would make your rule available to download with `rules add <name-of-rules>`.
+
+The command automatically determines the slug from your `rules.json` file. To make sure you have a `rules.json` file in your current directory, use `rules init`.
+
+## Helping users use your rules
+
+If you are building a developer tool and want to optimize how AI IDEs work with your tool, `rules` makes it easy to give your users the best experience.
+
+1. Make your account on the [registry](https://hub.continue.dev/signup) and create an organization
+2. [Publish your rules](index.md#publish-rules)
+3. Mention the corresponding `rules add <name-of-rules>` command in your documentation
