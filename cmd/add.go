@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -158,16 +159,38 @@ func loadOrCreateRuleSet(rulesJSONPath string) (*ruleset.RuleSet, error) {
 }
 
 // downloadRule downloads a rule from the registry
-func downloadRule(client *registry.Client, identifier *RuleIdentifier, rulesDir string) error {
+func downloadRule(client *registry.Client, identifier *RuleIdentifier, rulesDir string) (string, error) {
 	if strings.HasPrefix(identifier.FullName, "gh:") {
 		color.Cyan("Downloading rules from GitHub repository '%s' (src/ directory)...", identifier.FullName[3:])
 	} else {
 		color.Cyan("Downloading rule '%s/%s' (version %s) from registry API...", identifier.OwnerSlug, identifier.RuleSlug, identifier.Version)
 	}
 	
-	return client.DownloadRule(identifier.OwnerSlug, identifier.RuleSlug, identifier.Version, rulesDir)
-}
+	if err := client.DownloadRule(identifier.OwnerSlug, identifier.RuleSlug, identifier.Version, rulesDir); err != nil {
+		return "", fmt.Errorf("failed to download rule: %w", err)
+	}
 
+	// Check for the actual version in the downloaded rule.json file
+	ruleDir := filepath.Join(rulesDir, identifier.OwnerSlug, identifier.RuleSlug)
+	ruleInfoPath := filepath.Join(ruleDir, "rules.json")
+
+	if _, err := os.Stat(ruleInfoPath); err == nil {
+		// Rule info file exists, try to get the actual version
+		data, err := os.ReadFile(ruleInfoPath)
+		if err == nil {
+			var ruleInfo map[string]interface{}
+			if err := json.Unmarshal(data, &ruleInfo); err == nil {
+				if version, ok := ruleInfo["version"].(string); ok && version != "" {
+					return version, nil
+				}
+			}
+		}
+	}
+	
+	// If we can't find or parse the version, return an error
+	return "", fmt.Errorf("could not find or parse version from the downloaded rule")
+}
+	
 // runAddCommand implements the main logic for the add command
 func runAddCommand(cmd *cobra.Command, args []string) error {
 	// Parse rule identifier
@@ -202,18 +225,19 @@ func runAddCommand(cmd *cobra.Command, args []string) error {
 	client := registry.NewClient(cfg.RegistryURL)
 	client.SetAuthToken(authConfig.AccessToken)
 	
-	// Download rule
-	if err := downloadRule(client, identifier, rulesDir); err != nil {
+	// Download rule and get the actual version
+	actualVersion, err := downloadRule(client, identifier, rulesDir)
+	if err != nil {
 		return fmt.Errorf("failed to download rule: %w", err)
 	}
 	
 	// Add rule to ruleset using the full name and actual version
-	rs.AddRule(identifier.FullName, identifier.Version)
+	rs.AddRule(identifier.FullName, actualVersion)
 	if err := rs.SaveRuleSet(rulesJSONPath); err != nil {
 		return fmt.Errorf("failed to save ruleset: %w", err)
 	}
 	
-	color.Green("Rule '%s' (version %s) added successfully", identifier.FullName, identifier.Version)
+	color.Green("Rule '%s' (version %s) added successfully", identifier.FullName, actualVersion)
 	
 	// Print format suggestion at the very end if applicable
 	if formatSuggestion != "" {
