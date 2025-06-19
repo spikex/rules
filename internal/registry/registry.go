@@ -269,10 +269,9 @@ func (c *Client) downloadFromGitHub(repoPath string, formatDir string) error {
 	}
 	
 	// Extract rules from the zip
-	foundRules := false
+	foundFiles := false
 	repoPrefix := ""
-	downloadedFiles := []string{}
-	
+	var rulesJSONPath string
 	// First, determine the repository root directory name (it usually includes a commit hash)
 	for _, file := range zipReader.File {
 		parts := strings.Split(file.Name, "/")
@@ -286,65 +285,80 @@ func (c *Client) downloadFromGitHub(repoPath string, formatDir string) error {
 		return fmt.Errorf("could not determine repository structure")
 	}
 	
-	// Look for files in the src/ directory
-	srcPrefix := repoPrefix + "/src/"
-	
+	// Download all files in the repository
 	for _, file := range zipReader.File {
-		// Check if file is in the src/ directory
-		if strings.HasPrefix(file.Name, srcPrefix) {
-			foundRules = true
-			
 			// Skip directories, we'll create them as needed
 			if file.FileInfo().IsDir() {
 				continue
 			}
 			
-			// Open the file
-			src, err := file.Open()
+		// Skip files in the repository root
+		if !strings.Contains(file.Name, "/") {
+			continue
+			}
+			
+		// Open the file
+		src, err := file.Open()
 			if err != nil {
-				return fmt.Errorf("failed to open file from archive: %w", err)
+			return fmt.Errorf("failed to open file from archive: %w", err)
 			}
 			
-			// Get destination path without the repository and src/ prefix
-			relativePath := strings.TrimPrefix(file.Name, srcPrefix)
-			destPath := filepath.Join(ruleDir, relativePath)
-			
-			// Create directory for file if needed
-			destDir := filepath.Dir(destPath)
-			if err := os.MkdirAll(destDir, 0755); err != nil {
-				src.Close()
-				return fmt.Errorf("failed to create directory: %w", err)
-			}
-			
-			// Create the file
-			dest, err := os.Create(destPath)
-			if err != nil {
-				src.Close()
-				return fmt.Errorf("failed to create file: %w", err)
-			}
-			
-			// Copy the content
-			_, err = io.Copy(dest, src)
+		// Get destination path without the repository prefix
+		relativePath := strings.TrimPrefix(file.Name, repoPrefix+"/")
+		destPath := filepath.Join(ruleDir, relativePath)
+
+		// Create directory for file if needed
+		destDir := filepath.Dir(destPath)
+		if err := os.MkdirAll(destDir, 0755); err != nil {
 			src.Close()
-			dest.Close()
-			
-			if err != nil {
-				return fmt.Errorf("failed to write file: %w", err)
+			return fmt.Errorf("failed to create directory: %w", err)
 			}
 			
-			downloadedFiles = append(downloadedFiles, relativePath)
+		// Create the file
+		dest, err := os.Create(destPath)
+		if err != nil {
+			src.Close()
+			return fmt.Errorf("failed to create file: %w", err)
 		}
+
+		// Copy the content
+		_, err = io.Copy(dest, src)
+		src.Close()
+		dest.Close()
+
+		if err != nil {
+			return fmt.Errorf("failed to write file: %w", err)
 	}
 	
-	if !foundRules {
+		foundFiles = true
+
+		// Check if this is the rules.json file
+		if filepath.Base(relativePath) == "rules.json" {
+			rulesJSONPath = destPath
+		}
+	}
+	if !foundFiles {
 		// List all files in the repository to help with debugging
 		var fileList strings.Builder
 		fileList.WriteString("Files found in the repository:\n")
 		for _, file := range zipReader.File {
 			fileList.WriteString("  - " + file.Name + "\n")
 		}
-		return fmt.Errorf("no rules found in the src/ directory of the GitHub repository.\n%s", fileList.String())
+		return fmt.Errorf("no files found in the GitHub repository.\n%s", fileList.String())
 	}
 	
+	// Look for rules.json to find the version
+	if rulesJSONPath != "" {
+		// Try to read the version from rules.json
+		data, err := ioutil.ReadFile(rulesJSONPath)
+		if err == nil {
+			var ruleInfo map[string]interface{}
+			if err := json.Unmarshal(data, &ruleInfo); err == nil {
+				// If there's a version in rules.json, we'll use it when adding the rule
+				// The version will be picked up by the downloadRule function in add.go
+}
+		}
+	}
+
 	return nil
 }
