@@ -1,3 +1,10 @@
+## [1.1.2](https://github.com/continuedev/rules-cli/compare/v1.1.1...v1.1.2) (2025-06-19)
+
+
+### Bug Fixes
+
+* don't store version in package.json ([f7e10ea](https://github.com/continuedev/rules-cli/commit/f7e10ea073dc701eaeab8a07602c7707dddba590))
+
 ## [1.1.1](https://github.com/continuedev/rules-cli/compare/v1.1.0...v1.1.1) (2025-06-16)
 
 
