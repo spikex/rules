@@ -66,3 +66,7 @@ If you are building a developer tool and want to optimize how AI IDEs work with 
 1. Make your account on the [registry](https://hub.continue.dev/signup) and create an organization
 2. [Publish your rules](index.md#publish-rules)
 3. Mention the corresponding `rules add <name-of-rules>` command in your documentation
+
+### Contributing
+
+`rules` will be released as open source very soon! In the meantime, you can help by sharing feedback and rules!
