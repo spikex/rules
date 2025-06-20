@@ -13,6 +13,7 @@ To run all tests:
 ```bash
 cd tests
 go test -v
+
 ```
 
 ### Updating Golden Files
