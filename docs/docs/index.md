@@ -57,7 +57,7 @@ rules publish
 
 This would make your rule available to download with `rules add <name-of-rules>`.
 
-The command automatically determines the slug from your `rules.json` file. To make sure you have a `rules.json` file in your current directory, use `rules init`.
+The command automatically determines the slug from your `rules.json` file. To make sure you have a `rules.json` file in your current directory, use `rules init`, or use our [template repository](https://github.com/continuedev/rules-template).
 
 ## Helping users use your rules
 
