@@ -62,7 +62,7 @@ func (c *Client) SetAuthToken(token string) {
 func (c *Client) DownloadRule(ownerSlug, ruleSlug, version, formatDir string) error {
 	// Check if this is a GitHub repository
 	if strings.HasPrefix(ownerSlug, "gh:") {
-		return c.downloadFromGitHub(ownerSlug[3:]+"/"+ruleSlug, formatDir)
+		return c.downloadFromGitHub(ownerSlug[3:]+"/"+ruleSlug, "", formatDir)
 	}
 
 	// Use the registry API download endpoint
@@ -231,8 +231,14 @@ func (c *Client) PublishRule(ruleSlug, version, zipFilePath string, visibility s
 	return nil
 }
 
+// DownloadRuleFromGitHub downloads a rule from a GitHub repository with optional subpath
+func (c *Client) DownloadRuleFromGitHub(owner, repo, subPath, formatDir string) error {
+	repoPath := owner + "/" + repo
+	return c.downloadFromGitHub(repoPath, subPath, formatDir)
+}
+
 // downloadFromGitHub downloads rules from a GitHub repository
-func (c *Client) downloadFromGitHub(repoPath string, formatDir string) error {
+func (c *Client) downloadFromGitHub(repoPath, subPath, formatDir string) error {
 	// Construct GitHub API URL to download zip of the main branch
 	url := fmt.Sprintf("https://api.github.com/repos/%s/zipball/main", repoPath)
 
@@ -269,7 +275,12 @@ func (c *Client) downloadFromGitHub(repoPath string, formatDir string) error {
 	}
 
 	// Create rule directory
-	ruleDir := filepath.Join(formatDir, "gh:"+repoPath)
+	var ruleDir string
+	if subPath != "" {
+		ruleDir = filepath.Join(formatDir, "gh:"+repoPath+"/"+subPath)
+	} else {
+		ruleDir = filepath.Join(formatDir, "gh:"+repoPath)
+	}
 	if err := os.MkdirAll(ruleDir, 0755); err != nil {
 		return fmt.Errorf("failed to create rule directory: %w", err)
 	}
@@ -291,7 +302,7 @@ func (c *Client) downloadFromGitHub(repoPath string, formatDir string) error {
 		return fmt.Errorf("could not determine repository structure")
 	}
 
-	// Download all files in the repository
+	// Download files from the repository (filtered by subPath if provided)
 	for _, file := range zipReader.File {
 		// Skip directories, we'll create them as needed
 		if file.FileInfo().IsDir() {
@@ -303,14 +314,29 @@ func (c *Client) downloadFromGitHub(repoPath string, formatDir string) error {
 			continue
 		}
 
+		// Get relative path without the repository prefix
+		relativePath := strings.TrimPrefix(file.Name, repoPrefix+"/")
+		
+		// If subPath is specified, only include files within that path
+		if subPath != "" {
+			if !strings.HasPrefix(relativePath, subPath+"/") && relativePath != subPath {
+				continue
+			}
+			// Remove the subPath prefix from the relativePath for local storage
+			if strings.HasPrefix(relativePath, subPath+"/") {
+				relativePath = strings.TrimPrefix(relativePath, subPath+"/")
+			} else if relativePath == subPath {
+				// This is likely a file named exactly as the subPath
+				continue
+			}
+		}
+
 		// Open the file
 		src, err := file.Open()
 		if err != nil {
 			return fmt.Errorf("failed to open file from archive: %w", err)
 		}
 
-		// Get destination path without the repository prefix
-		relativePath := strings.TrimPrefix(file.Name, repoPrefix+"/")
 		destPath := filepath.Join(ruleDir, relativePath)
 
 		// Create directory for file if needed
