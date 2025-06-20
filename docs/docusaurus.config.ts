@@ -3,7 +3,7 @@ import type { Config } from "@docusaurus/types";
 import { themes as prismThemes } from "prism-react-renderer";
 
 const config: Config = {
-  title: "", // Empty because the "title" of index.md is shown
+  title: "rules CLI",
   tagline: "The CLI for managing AI rules",
   favicon: "img/favicon.ico",
 
