@@ -276,6 +276,11 @@ func ProcessRuleFiles(sourceDir string, targetFormat Format) error {
 			return nil
 		}
 
+		// Skip README.md files
+		if strings.ToLower(filepath.Base(path)) == "readme.md" {
+			return nil
+		}
+
 		// Check if the rule should be included in the target format
 		content, err := os.ReadFile(path)
 		if err != nil {
