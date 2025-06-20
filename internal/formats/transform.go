@@ -79,8 +79,8 @@ func TransformRuleContent(content []byte, format Format) ([]byte, error) {
 
 	var trimmedBodyContent = bytes.TrimSpace(bodyContent)
 
-	// Handle Cursor format fallback - if no frontmatter exists, use fallback format
-	if format.Name == "cursor" && len(metadata) == 0 {
+	// Handle Cursor format fallback - if no frontmatter exists or only irrelevant fields, use fallback format
+	if format.Name == "cursor" && shouldApplyCursorFallback(metadata) {
 		fallbackMetadata := RuleMetadata{
 			"description": EmptyYAMLValue{},
 			"globs":       EmptyYAMLValue{},
@@ -131,6 +131,32 @@ func TransformRuleContent(content []byte, format Format) ([]byte, error) {
 	result.Write(trimmedBodyContent)
 
 	return result.Bytes(), nil
+}
+
+// shouldApplyCursorFallback determines if Cursor format should apply fallback frontmatter
+// Returns true if metadata is empty OR contains only irrelevant fields (name, tags, etc.)
+func shouldApplyCursorFallback(metadata RuleMetadata) bool {
+	// If completely empty, apply fallback
+	if len(metadata) == 0 {
+		return true
+	}
+
+	// Define relevant fields for Cursor format
+	relevantFields := map[string]bool{
+		"description": true,
+		"alwaysApply": true,
+		"globs":       true,
+	}
+
+	// Check if any relevant fields exist
+	for key := range metadata {
+		if relevantFields[key] {
+			return false // Found a relevant field, don't apply fallback
+		}
+	}
+
+	// Only irrelevant fields found (like name, tags), apply fallback
+	return true
 }
 
 // cleanMetadataForYAML converts nil/empty values to EmptyYAMLValue for clean YAML output

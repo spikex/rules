@@ -599,6 +599,145 @@ func TestRenderRulesToFormat_OnlyMarkdownFiles(t *testing.T) {
 	}
 }
 
+// TestRenderRulesToFormat_CursorFallbackFrontmatter tests Cursor format fallback when frontmatter has only irrelevant fields
+func TestRenderRulesToFormat_CursorFallbackFrontmatter(t *testing.T) {
+	tests := []struct {
+		name                string
+		frontmatter         string
+		shouldApplyFallback bool
+	}{
+		{
+			name:                "Empty frontmatter should trigger fallback",
+			frontmatter:         "",
+			shouldApplyFallback: true,
+		},
+		{
+			name: "Only name property should trigger fallback",
+			frontmatter: `---
+name: abc
+---`,
+			shouldApplyFallback: true,
+		},
+		{
+			name: "Only tags property should trigger fallback",
+			frontmatter: `---
+tags: [frontend, react]
+---`,
+			shouldApplyFallback: true,
+		},
+		{
+			name: "Has description should not trigger fallback",
+			frontmatter: `---
+description: Test description
+---`,
+			shouldApplyFallback: false,
+		},
+		{
+			name: "Has alwaysApply should not trigger fallback",
+			frontmatter: `---
+alwaysApply: true
+---`,
+			shouldApplyFallback: false,
+		},
+		{
+			name: "Has globs should not trigger fallback",
+			frontmatter: `---
+globs: "**/*.tsx"
+---`,
+			shouldApplyFallback: false,
+		},
+		{
+			name: "Has description and name should not trigger fallback",
+			frontmatter: `---
+name: abc
+description: Test description
+---`,
+			shouldApplyFallback: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// Create temporary source directory
+			sourceDir := createTempSourceDir(t)
+			defer os.RemoveAll(sourceDir)
+
+			// Create test rule content
+			var testRuleContent string
+			if tt.frontmatter == "" {
+				testRuleContent = `# Test Rule
+
+This is a test rule.
+`
+			} else {
+				testRuleContent = tt.frontmatter + `
+
+# Test Rule
+
+This is a test rule.
+`
+			}
+
+			testRuleFile := filepath.Join(sourceDir, "test-rule.md")
+			if err := os.WriteFile(testRuleFile, []byte(testRuleContent), 0644); err != nil {
+				t.Fatalf("Failed to create test rule file: %v", err)
+			}
+
+			// Change to temporary directory for the test
+			origDir := getCurrentDir(t)
+			tmpTestDir := createTempTestDir(t)
+			defer func() {
+				os.Chdir(origDir)
+				os.RemoveAll(tmpTestDir)
+			}()
+			os.Chdir(tmpTestDir)
+
+			// Run RenderRulesToFormat for cursor
+			err := RenderRulesToFormat(sourceDir, "cursor", false)
+			if err != nil {
+				t.Fatalf("RenderRulesToFormat failed: %v", err)
+			}
+
+			// Verify file was created
+			expectedFile := filepath.Join(".cursor", "rules", "test-rule.mdc")
+			content, err := os.ReadFile(expectedFile)
+			if err != nil {
+				t.Fatalf("Failed to read generated file: %v", err)
+			}
+
+			contentStr := string(content)
+
+			if tt.shouldApplyFallback {
+				// Should have fallback frontmatter
+				if !strings.Contains(contentStr, "alwaysApply: true") {
+					t.Errorf("Expected fallback frontmatter to be applied.\nActual content:\n%s", contentStr)
+				}
+				if !strings.Contains(contentStr, "description:") {
+					t.Errorf("Expected fallback frontmatter to contain 'description:' field")
+				}
+				if !strings.Contains(contentStr, "globs:") {
+					t.Errorf("Expected fallback frontmatter to contain 'globs:' field")
+				}
+			} else {
+				// Should not have fallback frontmatter, but should have the original relevant fields
+				if strings.Contains(contentStr, "alwaysApply: true") && !strings.Contains(tt.frontmatter, "alwaysApply: true") {
+					t.Errorf("Fallback frontmatter should not be applied when relevant fields exist")
+				}
+			}
+
+			// Verify body content is preserved
+			if !strings.Contains(contentStr, "# Test Rule") {
+				t.Errorf("Rule body content was not preserved")
+			}
+
+			// If original frontmatter had irrelevant fields like 'name', they should be removed
+			if tt.shouldApplyFallback && strings.Contains(contentStr, "name:") {
+				t.Errorf("Irrelevant fields like 'name' should be removed in Cursor format")
+			}
+		})
+	}
+}
+
 // Helper functions
 
 func createTempSourceDir(t *testing.T) string {
