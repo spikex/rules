@@ -40,6 +40,7 @@ To add tests for a new command:
 ### Troubleshooting
 
 If tests fail with line ending differences, check:
+
 - Git configuration for line endings
 - Text editor settings
 - OS-specific differences in output generation
