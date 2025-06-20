@@ -1,10 +1,6 @@
 # rules
 
-:::tip
-
-**tl;dr:** `npm i -g rules-cli` then `rules add starter/nextjs-rules`
-
-:::
+> **tl;dr:** `npm i -g rules-cli` then `rules add starter/nextjs-rules`
 
 `rules` is a CLI built for managing rules across any AI developer tool. Rules are markdown files that encode workflows, preferences, tech stack details, and more in plain natural language so you can get better help from LLMs.
 
