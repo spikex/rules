@@ -10,6 +10,7 @@ Available Commands:
   add         Add a rule from the registry
   completion  Generate the autocompletion script for the specified shell
   create      Create a new rule using Continue format
+  formats     List all available render formats
   help        Help about any command
   init        Initialize a new rules directory
   install     Synchronize rules directory with rules.json
