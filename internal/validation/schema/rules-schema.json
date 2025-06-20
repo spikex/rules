@@ -33,6 +33,18 @@
       "description": "The version of the ruleset",
       "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$"
     },
+    "tags": {
+      "type": "array",
+      "description": "Tags to categorize or label the ruleset",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 50,
+        "pattern": "^[a-zA-Z0-9-_]+$"
+      },
+      "uniqueItems": true,
+      "maxItems": 20
+    },
     "rules": {
       "type": "object",
       "description": "A map of rule names to their versions",
