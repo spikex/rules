@@ -16,7 +16,16 @@ var renderCmd = &cobra.Command{
 Copies all rules from the default location (.rules/) to the target format
 as described in render-formats.md.
 
-Supported formats: continue, cursor, windsurf, claude, copilot, codex, cline, cody, amp`,
+Supported formats:
+  continue   - .continue/rules/*.md (Continue Dev rules)
+  cursor     - .cursor/rules/*.mdc (Cursor rules)
+  windsurf   - .windsurf/rules/*.md (Windsurf rules)
+  claude     - CLAUDE.md (Claude Code single file)
+  copilot    - .github/instructions/*.instructions.md (GitHub Copilot instructions)
+  codex      - AGENT.md (Codex single file)
+  cline      - .clinerules/*.md (Cline rules)
+  cody       - .sourcegraph/*.rule.md (Sourcegraph Cody rules)
+  amp        - AGENT.md (Amp single file)`,
 	Example: `  rules render cursor
   rules render continue`,
 	RunE: func(cmd *cobra.Command, args []string) error {

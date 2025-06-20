@@ -44,7 +44,17 @@ To use rules with your AI IDE of choice, you can "render" them to the necessary 
 rules render cursor
 ```
 
-will copy all of the `.rules/` into a `.cursor/rules/` folder. `rules` currently supports the following formats: cursor, continue, windsurf, claude, copilot, codex, cline, cody, and amp.
+will copy all of the `.rules/` into a `.cursor/rules/` folder. `rules` currently supports the following formats:
+
+- **continue** - `.continue/rules/*.md` (Continue Dev rules)
+- **cursor** - `.cursor/rules/*.mdc` (Cursor rules)
+- **windsurf** - `.windsurf/rules/*.md` (Windsurf rules)
+- **claude** - `CLAUDE.md` (Claude Code single file)
+- **copilot** - `.github/instructions/*.instructions.md` (GitHub Copilot instructions)
+- **codex** - `AGENT.md` (Codex single file)
+- **cline** - `.clinerules/*.md` (Cline rules)
+- **cody** - `.sourcegraph/*.rule.md` (Sourcegraph Cody rules)
+- **amp** - `AGENT.md` (Amp single file)
 
 ## Publish rules
 
