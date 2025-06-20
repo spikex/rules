@@ -26,26 +26,29 @@ The rule will be downloaded and added to the rules.json file.
 Rules are downloaded from the registry API using the GET endpoint 
 (e.g., api.continue.dev/v0/<owner-slug>/<rule-slug>/latest/download).
 
-For GitHub repositories, use the gh: prefix followed by the owner/repo.
-For example: gh:owner/repo
+For GitHub repositories, use the gh: prefix followed by the owner/repo[/path/to/folder].
+For example: gh:owner/repo or gh:owner/repo/path/to/specific/folder
 
 When importing from GitHub repositories, the tool will:
-- Download all files in the repository
+- Download all files in the repository (or specific folder if path is provided)
 - Use the main branch of the repository by default
 - Look for rules.json in the downloaded files to find the version`,
 	Example: `  rules add vercel/nextjs
   rules add redis
-  rules add gh:owner/repo`,
+  rules add gh:owner/repo
+  rules add gh:owner/repo/path/to/rules`,
 	Args: cobra.ExactArgs(1),
 	RunE: runAddCommand,
 }
 
 // RuleIdentifier contains the parsed components of a rule identifier
 type RuleIdentifier struct {
-	OwnerSlug string
-	RuleSlug  string
-	Version   string
-	FullName  string // The full name as it should appear in rules.json
+	OwnerSlug   string
+	RuleSlug    string
+	Version     string
+	FullName    string // The full name as it should appear in rules.json
+	SubPath     string // For GitHub repos: path within the repository
+	RepoName    string // For GitHub repos: the actual repository name
 }
 
 // parseRuleIdentifier extracts the owner, rule slug, and version from the input argument
@@ -56,7 +59,7 @@ func parseRuleIdentifier(ruleArg string) (*RuleIdentifier, error) {
 
 	// Handle GitHub repositories
 	if strings.HasPrefix(ruleArg, "gh:") {
-		// Format: gh:owner/repo or gh:owner/repo@version
+		// Format: gh:owner/repo[/path/to/folder][@version]
 		repoPath := ruleArg[3:] // Remove "gh:" prefix
 
 		// Check for version
@@ -65,15 +68,28 @@ func parseRuleIdentifier(ruleArg string) (*RuleIdentifier, error) {
 			identifier.Version = parts[1]
 		}
 
-		// Split owner/repo
+		// Split owner/repo/path...
 		repoParts := strings.Split(repoPath, "/")
-		if len(repoParts) != 2 {
-			return nil, fmt.Errorf("GitHub repository must be in format 'gh:owner/repo'")
+		if len(repoParts) < 2 {
+			return nil, fmt.Errorf("GitHub repository must be in format 'gh:owner/repo[/path/to/folder]'")
 		}
 
-		identifier.OwnerSlug = "gh:" + repoParts[0]
-		identifier.RuleSlug = repoParts[1]
+		owner := repoParts[0]
+		repo := repoParts[1]
+		
+		identifier.OwnerSlug = "gh:" + owner
+		identifier.RepoName = repo
 		identifier.FullName = ruleArg
+
+		// If there are more parts, it's a subfolder path
+		if len(repoParts) > 2 {
+			identifier.SubPath = strings.Join(repoParts[2:], "/")
+			// Use the last folder name as the rule slug
+			identifier.RuleSlug = repoParts[len(repoParts)-1]
+		} else {
+			// Use the repo name as the rule slug for root-level rules
+			identifier.RuleSlug = repo
+		}
 
 		return identifier, nil
 	}
@@ -162,19 +178,32 @@ func loadOrCreateRuleSet(rulesJSONPath string) (*ruleset.RuleSet, error) {
 // downloadRule downloads a rule from the registry
 func downloadRule(client *registry.Client, identifier *RuleIdentifier, rulesDir string) (string, error) {
 	if strings.HasPrefix(identifier.FullName, "gh:") {
-		color.Cyan("Downloading rules from GitHub repository '%s'...", identifier.FullName[3:])
+		if identifier.SubPath != "" {
+			color.Cyan("Downloading rules from GitHub repository '%s' (path: %s)...", identifier.OwnerSlug[3:]+"/"+identifier.RepoName, identifier.SubPath)
+			if err := client.DownloadRuleFromGitHub(identifier.OwnerSlug[3:], identifier.RepoName, identifier.SubPath, rulesDir); err != nil {
+				return "", fmt.Errorf("failed to download rule: %w", err)
+			}
+		} else {
+			color.Cyan("Downloading rules from GitHub repository '%s'...", identifier.FullName[3:])
+			if err := client.DownloadRule(identifier.OwnerSlug, identifier.RuleSlug, identifier.Version, rulesDir); err != nil {
+				return "", fmt.Errorf("failed to download rule: %w", err)
+			}
+		}
 	} else {
 		color.Cyan("Downloading rule '%s/%s' (version %s) from registry API...", identifier.OwnerSlug, identifier.RuleSlug, identifier.Version)
-	}
-
-	if err := client.DownloadRule(identifier.OwnerSlug, identifier.RuleSlug, identifier.Version, rulesDir); err != nil {
-		return "", fmt.Errorf("failed to download rule: %w", err)
+		if err := client.DownloadRule(identifier.OwnerSlug, identifier.RuleSlug, identifier.Version, rulesDir); err != nil {
+			return "", fmt.Errorf("failed to download rule: %w", err)
+		}
 	}
 
 	// Check for the actual version in the downloaded rule.json file
 	var ruleDir string
 	if strings.HasPrefix(identifier.FullName, "gh:") {
-		ruleDir = filepath.Join(rulesDir, "gh:"+identifier.OwnerSlug[3:]+"/"+identifier.RuleSlug)
+		if identifier.SubPath != "" {
+			ruleDir = filepath.Join(rulesDir, "gh:"+identifier.OwnerSlug[3:]+"/"+identifier.RepoName+"/"+identifier.SubPath)
+		} else {
+			ruleDir = filepath.Join(rulesDir, "gh:"+identifier.OwnerSlug[3:]+"/"+identifier.RepoName)
+		}
 	} else {
 		ruleDir = filepath.Join(rulesDir, identifier.OwnerSlug, identifier.RuleSlug)
 	}

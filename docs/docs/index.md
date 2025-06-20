@@ -33,7 +33,7 @@ This will add them to your project in a local `.rules` folder.
 You can also download from GitHub rather than the rules registry:
 
 ```bash
-rules add gh:continuedev/rules-template
+rules add gh:continuedev/awesome-rules/ruby
 ```
 
 ## Render rules
@@ -57,7 +57,7 @@ rules publish
 
 This would make your rule available to download with `rules add <name-of-rules>`.
 
-The command automatically determines the slug from your `rules.json` file. To make sure you have a `rules.json` file in your current directory, use `rules init`, or use our [template repository](https://github.com/continuedev/rules-template).
+The command automatically determines the slug from your `rules.json` file. To make sure you have a `rules.json` file in your current directory, use `rules init` or our [template repository](https://github.com/continuedev/rules-template), which includes a GitHub Action for publishing.
 
 ## Helping users use your rules
 
