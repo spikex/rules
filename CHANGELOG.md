@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/continuedev/rules/compare/v1.1.6...v1.2.0) (2025-06-20)
+
+
+### Features
+
+* adds format ([83ec8be](https://github.com/continuedev/rules/commit/83ec8be7f3d8d485e24061d2d01d410a3354135a))
+
 ## [1.1.6](https://github.com/continuedev/rules/compare/v1.1.5...v1.1.6) (2025-06-20)
 
 
