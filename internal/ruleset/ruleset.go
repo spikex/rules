@@ -99,26 +99,26 @@ func CreateRule(rule Rule, format, name string) (string, error) {
 
 	// Create content with Continue format front matter
 	content := "---\n"
-	
+
 	// Continue format: alwaysApply field (required in Continue format)
 	if rule.AlwaysApply {
 		content += "alwaysApply: true\n"
 	} else {
 		content += "alwaysApply: false\n"
 	}
-	
+
 	// Continue format: description field
 	if rule.Description != "" {
 		content += "description: " + rule.Description + "\n"
 	}
-	
+
 	// Continue format: globs field
 	if rule.Globs != "" {
 		content += "globs: \"" + rule.Globs + "\"\n"
 	}
-	
+
 	// Note: Tags are not part of Continue format specification
-	
+
 	content += "---\n\n" + rule.Body
 
 	// Determine directory based on format (use Continue format)
@@ -135,7 +135,7 @@ func CreateRule(rule Rule, format, name string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	
+
 	return fileName, nil
 }
 
