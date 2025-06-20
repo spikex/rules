@@ -14,6 +14,7 @@ type Format struct {
 	FileExtension   string
 	IsSingleFile    bool
 	SingleFilePath  string
+	Description     string
 }
 
 // GetFormat returns a Format for the given format name
@@ -25,6 +26,7 @@ func GetFormat(formatName string) Format {
 			DirectoryPrefix: ".rules",
 			FileExtension:   ".md",
 			IsSingleFile:    false,
+			Description:     "Default rules format",
 		}
 	}
 
@@ -36,6 +38,7 @@ func GetFormat(formatName string) Format {
 			DirectoryPrefix: ".continue/rules",
 			FileExtension:   ".md",
 			IsSingleFile:    false,
+			Description:     "Continue Dev rules",
 		}
 	case "cursor":
 		return Format{
@@ -43,6 +46,7 @@ func GetFormat(formatName string) Format {
 			DirectoryPrefix: ".cursor/rules",
 			FileExtension:   ".mdc",
 			IsSingleFile:    false,
+			Description:     "Cursor rules",
 		}
 	case "windsurf":
 		return Format{
@@ -50,6 +54,7 @@ func GetFormat(formatName string) Format {
 			DirectoryPrefix: ".windsurf/rules",
 			FileExtension:   ".md",
 			IsSingleFile:    false,
+			Description:     "Windsurf rules",
 		}
 	case "claude":
 		return Format{
@@ -58,6 +63,7 @@ func GetFormat(formatName string) Format {
 			FileExtension:   ".md",
 			IsSingleFile:    true,
 			SingleFilePath:  "CLAUDE.md",
+			Description:     "Claude Code single file",
 		}
 	case "copilot":
 		return Format{
@@ -65,6 +71,7 @@ func GetFormat(formatName string) Format {
 			DirectoryPrefix: ".github/instructions",
 			FileExtension:   ".instructions.md",
 			IsSingleFile:    false,
+			Description:     "GitHub Copilot instructions",
 		}
 	case "codex":
 		return Format{
@@ -73,6 +80,7 @@ func GetFormat(formatName string) Format {
 			FileExtension:   ".md",
 			IsSingleFile:    true,
 			SingleFilePath:  "AGENT.md",
+			Description:     "Codex single file",
 		}
 	case "cline":
 		return Format{
@@ -80,6 +88,7 @@ func GetFormat(formatName string) Format {
 			DirectoryPrefix: ".clinerules",
 			FileExtension:   ".md",
 			IsSingleFile:    false,
+			Description:     "Cline rules",
 		}
 	case "cody":
 		return Format{
@@ -87,6 +96,7 @@ func GetFormat(formatName string) Format {
 			DirectoryPrefix: ".sourcegraph",
 			FileExtension:   ".rule.md",
 			IsSingleFile:    false,
+			Description:     "Sourcegraph Cody rules",
 		}
 	case "amp":
 		return Format{
@@ -95,6 +105,7 @@ func GetFormat(formatName string) Format {
 			FileExtension:   ".md",
 			IsSingleFile:    true,
 			SingleFilePath:  "AGENT.md",
+			Description:     "Amp single file",
 		}
 	default:
 		// For any other format, use .<format>/rules
@@ -103,6 +114,7 @@ func GetFormat(formatName string) Format {
 			DirectoryPrefix: fmt.Sprintf(".%s/rules", formatName),
 			FileExtension:   ".md",
 			IsSingleFile:    false,
+			Description:     fmt.Sprintf("%s rules", formatName),
 		}
 	}
 }
@@ -196,4 +208,20 @@ func GetFormatSuggestionMessage() (string, error) {
 func RenderRules(sourceDir string, targetFormat Format) error {
 	// Use the transformer to process the rule files
 	return ProcessRuleFiles(sourceDir, targetFormat)
+}
+
+// GetAllFormats returns a list of all supported formats
+func GetAllFormats() []Format {
+	formats := []Format{
+		GetFormat("continue"),
+		GetFormat("cursor"),
+		GetFormat("windsurf"),
+		GetFormat("claude"),
+		GetFormat("copilot"),
+		GetFormat("codex"),
+		GetFormat("cline"),
+		GetFormat("cody"),
+		GetFormat("amp"),
+	}
+	return formats
 }
