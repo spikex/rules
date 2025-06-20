@@ -219,6 +219,12 @@ func (c *Client) PublishRule(ruleSlug, version, zipFilePath string, visibility s
 
 	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusCreated {
 		bodyBytes, _ := ioutil.ReadAll(resp.Body)
+
+		// Provide a more helpful error message for version conflicts
+		if resp.StatusCode == http.StatusConflict {
+			return fmt.Errorf("version %s of rule '%s' already exists. Please increment the version in your rules.json file", version, ruleSlug)
+		}
+
 		return fmt.Errorf("failed to publish rule: status %d, response: %s", resp.StatusCode, string(bodyBytes))
 	}
 
