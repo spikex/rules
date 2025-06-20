@@ -5,6 +5,7 @@ import { themes as prismThemes } from "prism-react-renderer";
 const config: Config = {
   title: "rules CLI",
   tagline: "The CLI for managing AI rules",
+
   favicon: "img/favicon.ico",
 
   future: {
