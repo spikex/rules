@@ -1,7 +1,7 @@
 {
   "name": "rules-cli",
   "version": "1.1.4",
-  "description": "Rules CLI tool",
+  "description": "CLI for managing rules across any AI IDE",
   "files": [
     "bin.js",
     "bin/"
