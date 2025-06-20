@@ -1,3 +1,14 @@
+## [1.1.5](https://github.com/continuedev/rules/compare/v1.1.4...v1.1.5) (2025-06-20)
+
+
+### Bug Fixes
+
+* ability to download from gh: subpath ([f32215f](https://github.com/continuedev/rules/commit/f32215f461eadcff02b79ef3444d078901c3bdab))
+* did you mean add? reminder ([8c08dfb](https://github.com/continuedev/rules/commit/8c08dfbec59649ff585454aad5375620b81ede6c))
+* fallback front matter ([e6e96a4](https://github.com/continuedev/rules/commit/e6e96a46f044cd1ca2a2c8a891733046f8956deb))
+* use a different token for semantic release ([879947a](https://github.com/continuedev/rules/commit/879947a8518ddc85d5b2e1eea7c309ec94738b13))
+* use empty space instead of "null" for null values in frontmatter ([4e9da96](https://github.com/continuedev/rules/commit/4e9da9678476f372d331dd1a59a54def532f371a))
+
 ## [1.1.4](https://github.com/continuedev/rules-cli/compare/v1.1.3...v1.1.4) (2025-06-19)
 
 
