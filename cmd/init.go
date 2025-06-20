@@ -21,13 +21,17 @@ This creates the necessary directory structure and an empty rules.json file.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		color.Cyan("Initializing rules with format: %s", format)
 
-		// Check if rules.json doesn't exist
+		// Check if rules.json already exists
 		rulesJSONPath, err := formats.GetRulesJSONPath(format)
 		if err != nil {
 			return fmt.Errorf("failed to get rules.json path: %w", err)
 		}
 
-		if _, err := os.Stat(rulesJSONPath); os.IsNotExist(err) {
+		if _, err := os.Stat(rulesJSONPath); err == nil {
+			// rules.json already exists - warn the user
+			color.Yellow("Warning: %s already exists", rulesJSONPath)
+			color.Yellow("Initialization will skip creating rules.json but may create/update directory structure")
+		} else if os.IsNotExist(err) {
 			// Check for any top-level folder of the structure ".{folder-name}/rules"
 			formatFolders, err := formats.FindRulesFormats()
 			if err == nil && len(formatFolders) > 0 {
