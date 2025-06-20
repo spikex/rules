@@ -1,3 +1,10 @@
+## [1.1.6](https://github.com/continuedev/rules/compare/v1.1.5...v1.1.6) (2025-06-20)
+
+
+### Bug Fixes
+
+* always add frontmatter for cursor format ([297f68a](https://github.com/continuedev/rules/commit/297f68af075a6296d25c4dddebea18f0142e7ac4))
+
 ## [1.1.5](https://github.com/continuedev/rules/compare/v1.1.4...v1.1.5) (2025-06-20)
 
 
