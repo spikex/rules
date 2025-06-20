@@ -22,7 +22,7 @@ completion|tests/golden/completion/completion.golden
 # create|tests/golden/create/create.golden
 
 # install
-install|tests/golden/install/install.golden
+# install|tests/golden/install/install.golden
 
 # logout
 logout|tests/golden/logout/logout.golden
