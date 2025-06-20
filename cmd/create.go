@@ -14,7 +14,6 @@ import (
 )
 
 var (
-	tags        []string
 	globs       string
 	description string
 	alwaysApply bool
@@ -24,12 +23,13 @@ var (
 // createCmd represents the create command
 var createCmd = &cobra.Command{
 	Use:   "create [rule-name] [rule-body]",
-	Short: "Create a new rule",
-	Long: `Create a new rule in the current ruleset.
+	Short: "Create a new rule using Continue format",
+	Long: `Create a new rule in the .continue/rules directory using Continue format specification.
 If rule parameters are not provided, they will be prompted for interactively.
 This command does not modify the rules.json file.`,
 	Example: `  rules create my-rule "This is the body of the rule"
-  rules create --tags frontend --globs "*.{tsx,jsx}" --description "React style guide" my-rule`,
+  rules create --globs "**/*.{tsx,jsx}" --description "React style guide" my-rule
+  rules create --alwaysApply "Always apply this rule"`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		// Get rule name
 		if len(args) > 0 {
@@ -51,33 +51,39 @@ This command does not modify the rules.json file.`,
 			}
 		}
 
-		// Create rule struct
+		// Create rule struct for Continue format
 		rule := ruleset.Rule{
 			Description: description,
 			Globs:       globs,
 			AlwaysApply: alwaysApply,
 		}
 
-		// Process tags
-		if len(tags) > 0 {
-			rule.Tags = tags
-		} else if rule.Tags == nil {
+		// Prompt for globs if not provided
+		if rule.Globs == "" {
 			prompt := promptui.Prompt{
-				Label: "Tags (comma-separated)",
+				Label:   "Glob patterns",
+				Default: "**/*",
 			}
-			tagsInput, err := prompt.Run()
+			var err error
+			rule.Globs, err = prompt.Run()
 			if err != nil {
-				return fmt.Errorf("failed to get tags: %w", err)
-			}
-
-			if tagsInput != "" {
-				rule.Tags = strings.Split(tagsInput, ",")
-				// Trim whitespace from tags
-				for i, tag := range rule.Tags {
-					rule.Tags[i] = strings.TrimSpace(tag)
-				}
+				return fmt.Errorf("failed to get globs: %w", err)
 			}
 		}
+
+		// Prompt for description if not provided
+		if rule.Description == "" {
+			prompt := promptui.Prompt{
+				Label: "Rule description",
+			}
+			var err error
+			rule.Description, err = prompt.Run()
+			if err != nil {
+				return fmt.Errorf("failed to get description: %w", err)
+			}
+		}
+
+		// Note: Tags are not part of Continue format specification and are omitted
 
 		// Get rule body
 		if len(args) > 1 {
@@ -95,12 +101,13 @@ This command does not modify the rules.json file.`,
 			rule.Body = strings.Join(bodyLines, "\n")
 		}
 
-		// Create the rule file
-		if err := ruleset.CreateRule(rule, format, ruleName); err != nil {
+		// Create the rule file in Continue format
+		filePath, err := ruleset.CreateRule(rule, "continue", ruleName)
+		if err != nil {
 			return fmt.Errorf("failed to create rule: %w", err)
 		}
 
-		color.Green("Rule '%s' created successfully", ruleName)
+		color.Green("Rule '%s' created successfully at %s", ruleName, filePath)
 		return nil
 	},
 }
@@ -108,8 +115,7 @@ This command does not modify the rules.json file.`,
 func init() {
 	rootCmd.AddCommand(createCmd)
 
-	createCmd.Flags().StringSliceVar(&tags, "tags", nil, "Tags for the rule (comma-separated)")
-	createCmd.Flags().StringVar(&globs, "globs", "", "Glob patterns to match files")
+	createCmd.Flags().StringVar(&globs, "globs", "", "Glob patterns to match files (defaults to \"**/*\" if not specified)")
 	createCmd.Flags().StringVar(&description, "description", "", "Short description of the rule")
-	createCmd.Flags().BoolVar(&alwaysApply, "alwaysApply", false, "Whether to always apply the rule")
+	createCmd.Flags().BoolVar(&alwaysApply, "alwaysApply", false, "Whether to always apply the rule (creates alwaysApply: true in frontmatter)")
 }

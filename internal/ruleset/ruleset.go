@@ -91,44 +91,52 @@ func (rs *RuleSet) GetRuleVersion(name string) (string, bool) {
 	return version, exists
 }
 
-// CreateRule writes a rule to a markdown file
-func CreateRule(rule Rule, format, name string) error {
+// CreateRule writes a rule to a markdown file and returns the file path
+func CreateRule(rule Rule, format, name string) (string, error) {
 	if strings.TrimSpace(name) == "" {
-		return errors.New("rule name cannot be empty")
+		return "", errors.New("rule name cannot be empty")
 	}
 
-	// Create content with front matter
+	// Create content with Continue format front matter
 	content := "---\n"
+	
+	// Continue format: alwaysApply field (required in Continue format)
+	if rule.AlwaysApply {
+		content += "alwaysApply: true\n"
+	} else {
+		content += "alwaysApply: false\n"
+	}
+	
+	// Continue format: description field
 	if rule.Description != "" {
 		content += "description: " + rule.Description + "\n"
 	}
-	if len(rule.Tags) > 0 {
-		content += "tags: [" + strings.Join(rule.Tags, ", ") + "]\n"
-	}
+	
+	// Continue format: globs field
 	if rule.Globs != "" {
-		content += "globs: " + rule.Globs + "\n"
+		content += "globs: \"" + rule.Globs + "\"\n"
 	}
-	if rule.AlwaysApply {
-		content += "alwaysApply: true\n"
-	}
+	
+	// Note: Tags are not part of Continue format specification
+	
 	content += "---\n\n" + rule.Body
 
-	// Determine directory based on format
-	var ruleDir string
-	if format == "default" {
-		ruleDir = ".rules"
-	} else {
-		ruleDir = "." + format + "/rules"
-	}
+	// Determine directory based on format (use Continue format)
+	ruleDir := ".continue/rules"
 
 	// Ensure the directory exists
 	if err := os.MkdirAll(ruleDir, 0755); err != nil {
-		return err
+		return "", err
 	}
 
 	// Create the rule file
 	fileName := filepath.Join(ruleDir, name+".md")
-	return os.WriteFile(fileName, []byte(content), 0644)
+	err := os.WriteFile(fileName, []byte(content), 0644)
+	if err != nil {
+		return "", err
+	}
+	
+	return fileName, nil
 }
 
 // FindRuleSetFile looks for rules.json in the current directory or specified path
