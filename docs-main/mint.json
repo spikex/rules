@@ -1,0 +1,28 @@
+{
+  "$schema": "https://mintlify.com/schema.json",
+  "name": "Rules CLI Docs",
+  "logo": {
+    "dark": "/favicon.ico",
+    "light": "/favicon.ico"
+  },
+  "favicon": "/favicon.ico",
+  "colors": {
+    "primary": "#0D9373",
+    "light": "#07C983",
+    "dark": "#0D9373",
+    "anchors": {
+      "from": "#0D9373",
+      "to": "#07C983"
+    }
+  },
+  "topbarLinks": [],
+  "tabs": [],
+  "anchors": [],
+  "footerSocials": {},
+  "navigation": [
+    {
+      "group": "Rules",
+      "pages": ["index"]
+    }
+  ]
+}
