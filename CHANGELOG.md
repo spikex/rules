@@ -1,3 +1,10 @@
+## [1.2.3](https://github.com/continuedev/rules/compare/v1.2.2...v1.2.3) (2025-06-25)
+
+
+### Bug Fixes
+
+* correct name for darwin-amd64 ([14c13f1](https://github.com/continuedev/rules/commit/14c13f161340970a24c48dba5d14c85cc7d866b0))
+
 ## [1.2.2](https://github.com/continuedev/rules/compare/v1.2.1...v1.2.2) (2025-06-25)
 
 
