@@ -24,6 +24,7 @@ rules-cli/
 │   ├── create.go       # Create command
 │   ├── add.go          # Add command
 │   ├── remove.go       # Remove command
+│   ├── list.go       # List command
 │   ├── render.go       # Render command
 │   ├── install.go      # Install command
 │   ├── publish.go      # Publish command
@@ -82,6 +83,7 @@ This is the body of the rule. It supports Markdown syntax.
 - [`rules create`](commands/create.md) - Creates a new rule file in the rules directory
 - [`rules add`](commands/add.md) - Adds a rule to the project
 - [`rules remove`](commands/remove.md) - Removes a rule from the project
+- [`rules list`](commands/list.md) - Lists all rules currently installed in the project
 - [`rules render`](commands/render.md) - Renders existing rules to a specified format
 - [`rules install`](commands/install.md) - Synchronizes the `.rules` directory with the contents of `rules.json`
 
