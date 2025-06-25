@@ -1,3 +1,10 @@
+## [1.2.1](https://github.com/continuedev/rules/compare/v1.2.0...v1.2.1) (2025-06-25)
+
+
+### Bug Fixes
+
+* rules list command ([3058f57](https://github.com/continuedev/rules/commit/3058f57ab0984628e2e00029e7d80294994ae4ce))
+
 # [1.2.0](https://github.com/continuedev/rules/compare/v1.1.6...v1.2.0) (2025-06-20)
 
 
