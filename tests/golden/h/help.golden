@@ -14,6 +14,7 @@ Available Commands:
   help        Help about any command
   init        Initialize a new rules directory
   install     Synchronize rules directory with rules.json
+  list        List all rules currently installed in the project
   login       Authenticate with the registry service
   logout      Log out from the registry service
   publish     Publish a rule package to the registry
