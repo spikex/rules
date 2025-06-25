@@ -24,7 +24,7 @@ var (
 var createCmd = &cobra.Command{
 	Use:   "create [rule-name] [rule-body]",
 	Short: "Create a new rule using Continue format",
-	Long: `Create a new rule in the .continue/rules directory using Continue format specification.
+	Long: `Create a new rule in the current directory using Continue format specification.
 If rule parameters are not provided, they will be prompted for interactively.
 This command does not modify the rules.json file.`,
 	Example: `  rules create my-rule "This is the body of the rule"
