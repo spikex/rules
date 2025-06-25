@@ -60,13 +60,22 @@ will copy all of the `.rules/` into a `.cursor/rules/` folder. `rules` currently
 To make your rules available to others, you can publish using `rules publish`:
 
 ```bash
+# Login
 rules login
+
+# Create a rules.json
+rules init
+
+# Create a rule
+rules create
+
+# Publish
 rules publish
 ```
 
-This would make your rule available to download with `rules add <name-of-rules>`.
+This would make your rules available to download with `rules add <name-of-rules>`.
 
-The command automatically determines the slug from your `rules.json` file. To make sure you have a `rules.json` file in your current directory, use `rules init` or our [template repository](https://github.com/continuedev/rules-template), which includes a GitHub Action for publishing.
+You can use our [template repository](https://github.com/continuedev/rules-template) to automate publishing with GitHub Actions.
 
 ## Helping users use your rules
 
