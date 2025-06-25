@@ -1,3 +1,10 @@
+## [1.2.2](https://github.com/continuedev/rules/compare/v1.2.1...v1.2.2) (2025-06-25)
+
+
+### Bug Fixes
+
+* rules create should create file in current directory ([9c73982](https://github.com/continuedev/rules/commit/9c7398214b3c8919494d4424a1b2b891aa8b3209))
+
 ## [1.2.1](https://github.com/continuedev/rules/compare/v1.2.0...v1.2.1) (2025-06-25)
 
 
