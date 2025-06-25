@@ -14,7 +14,7 @@ rules create --alwaysApply "Always apply this rule" # Body not supplied, so will
 ## Flags
 
 - `--tags`: Comma-separated list of tags
-- `--globs`: Glob patterns to match files (defaults to "**/*" if not specified)
+- `--globs`: Glob patterns to match files (defaults to "\*\*/\*" if not specified)
 - `--description`: Short description
 - `--alwaysApply`: Flag to always apply rule (creates `alwaysApply: true` in frontmatter)
 
@@ -27,10 +27,9 @@ rules create --alwaysApply "Always apply this rule" # Body not supplied, so will
 
 - Prompts for missing fields if not provided
 - Allows for stdin/editor input for rule body
-- Creates a new rule (.md) file in `.continue/rules/` directory following Continue format
+- Creates a new rule (.md) file in the current directory following Continue format
 - Uses Continue frontmatter format with `alwaysApply`, `description`, and `globs` fields
 - Does not modify the rules.json file
-- Automatically creates `.continue/rules/` directory if it doesn't exist
 
 ## Continue Format Output
 
@@ -47,8 +46,9 @@ globs: "**/*.tsx"
 ```
 
 ### Frontmatter Fields:
+
 - `alwaysApply`: boolean - Whether to always apply the rule (set via `--alwaysApply` flag)
 - `description`: string - Short description of the rule (set via `--description` flag)
-- `globs`: string - Glob patterns to match files (set via `--globs` flag, defaults to "**/*")
+- `globs`: string - Glob patterns to match files (set via `--globs` flag, defaults to "\*\*/\*")
 
 Note: Tags are not part of the Continue format specification and will be omitted from the frontmatter.

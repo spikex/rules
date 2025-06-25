@@ -121,16 +121,8 @@ func CreateRule(rule Rule, format, name string) (string, error) {
 
 	content += "---\n\n" + rule.Body
 
-	// Determine directory based on format (use Continue format)
-	ruleDir := ".continue/rules"
-
-	// Ensure the directory exists
-	if err := os.MkdirAll(ruleDir, 0755); err != nil {
-		return "", err
-	}
-
-	// Create the rule file
-	fileName := filepath.Join(ruleDir, name+".md")
+	// Create the rule file in the current directory
+	fileName := name + ".md"
 	err := os.WriteFile(fileName, []byte(content), 0644)
 	if err != nil {
 		return "", err
